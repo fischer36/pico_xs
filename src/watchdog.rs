@@ -1,14 +1,11 @@
-use rp_pico::XOSC_CRYSTAL_FREQ;
+use crate::regs::{PSM_BASE, WATCHDOG_BASE};
 
-const PSM_BASE: u32 = 0x40010000;
 const PSM_WDSEL: *mut u32 = (PSM_BASE + 0x8) as *mut u32;
-const PSM_WDSEL_BITS: u32 = 0x0001ffff;
-const WATCHDOG_BASE: u32 = 0x40058000;
 const WATCHDOG_CTRL: *mut u32 = (WATCHDOG_BASE + 0x00) as *mut u32;
 const WATCHDOG_CTRL_ENABLE_BITS: u32 = 0x40000000;
 const WATCHDOG_LOAD: *mut u32 = (WATCHDOG_BASE + 0x04) as *mut u32;
-pub const WATCHDOG_NON_REBOOT_MAGIC: u32 = 0x6ab73121;
-pub const WATCHDOG_REBOOT_MAGIC: u32 = 0x6ab73120;
+const WATCHDOG_NON_REBOOT_MAGIC: u32 = 0x6ab73121;
+const WATCHDOG_REBOOT_MAGIC: u32 = 0x6ab73120;
 const WATCHDOG_SCRATCH_4: *mut u32 = (WATCHDOG_BASE + 0x1c) as *mut u32;
 const WATCHDOG_TICK: *mut u32 = (WATCHDOG_BASE + 0x2c) as *mut u32;
 
