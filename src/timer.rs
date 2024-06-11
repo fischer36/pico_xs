@@ -33,7 +33,7 @@ pub fn set_timer() {
         core::ptr::write_volatile(timer_inte, old | (1 << 0));
 
         // Dynamically place your interrupt handler interrupt function pointer in the vtable.
-
+        //
         // Enable interrupt handler
         const PPB_BASE: u32 = 0xe0000000;
         let nvic_iser: u32 = 0xe100;
@@ -46,14 +46,5 @@ pub fn set_timer() {
         // write time for when alarm should trigger
         let alarm_zero: *mut u64 = (regs::TIMER_BASE + 0x10) as *mut u64;
         core::ptr::write_volatile(alarm_zero, current_time_micro + half_second);
-    }
-}
-
-fn interrupt() {
-    // clear bit to disable interrupt lathced to timer
-    let timer_intrrupt: *mut u32 = (regs::TIMER_BASE + 0x34) as *mut u32;
-    unsafe {
-        let old = core::ptr::read_volatile(timer_intrrupt);
-        core::ptr::write_volatile(timer_intrrupt, old & !(1 << 0));
     }
 }

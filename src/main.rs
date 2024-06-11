@@ -9,14 +9,58 @@ pub mod regs;
 pub mod reset;
 pub mod sio;
 pub mod timer;
+pub mod vector_table;
 pub mod watchdog;
-
+use sio::out_set;
+use vector_table::VectorTable;
+static mut RAM_VTABLE: VectorTable = VectorTable::new();
 use watchdog::{did_reboot, update};
+static mut FIRED: bool = false;
+
+static mut twice: bool = false;
+extern "C" fn test_timer_irq0() {
+    sio::out_clr(25);
+    sleep();
+    sleep();
+    sio::out_set(25);
+    // unsafe {
+    //     if twice == true {
+    //         sio::out_set(25)
+    //     } else {
+    //         sio::out_clr(25);
+    //     }
+    //     twice = !twice
+    // }
+    // clear bit to disable interrupt lathced to timer
+    let timer_intrrupt: *mut u32 = (regs::TIMER_BASE + 0x34) as *mut u32;
+    unsafe {
+        let old = core::ptr::read_volatile(timer_intrrupt);
+        core::ptr::write_volatile(timer_intrrupt, old & !(1 << 0));
+    }
+    unsafe {
+        FIRED = true;
+    }
+}
 
 #[entry]
 fn main() -> ! {
     reset::reset();
-    timer::set_timer();
+    // let mut pac = rp_pico::hal::pac::Peripherals::take().unwrap();
+
+    let scb = unsafe { &*rp_pico::hal::pac::SCB::ptr() };
+
+    // Read the current VTOR address
+    // Copy the vector table from flash to RAM
+    let mut pac = rp_pico::hal::pac::Peripherals::take().unwrap();
+    let ppb = &mut pac.PPB;
+    unsafe {
+        RAM_VTABLE.init(ppb);
+        RAM_VTABLE.register_handler(
+            rp2040_hal::pac::Interrupt::TIMER_IRQ_0 as usize,
+            test_timer_irq0,
+        );
+    }
+
     sio::oe_clr(15);
     sio::out_clr(15);
     io::gpio_ctrl(15);
@@ -27,7 +71,15 @@ fn main() -> ! {
     io::gpio_ctrl(25);
     sio::oe_set(25);
 
-    let mut on = false;
+    sio::out_set(25);
+
+    unsafe {
+        scb.vtor.write(&mut RAM_VTABLE as *mut _ as u32);
+    }
+    timer::set_timer();
+
+    //     on = false
+    // } else {
 
     // if did_reboot() == true {
     //     watchdog::enable(300, true);
@@ -36,6 +88,23 @@ fn main() -> ! {
     // }
     // let mut counter = 0;
     loop {
+        sleep();
+
+        // sio::out_clr(25);
+
+        sleep();
+        // sio::out_set(25);
+        unsafe {
+            if FIRED == true {
+                // sio::out_clr(25);
+                loop {
+                    sio::out_clr(25);
+                    sleep();
+                    sio::out_set(25);
+                }
+            }
+        }
+
         // counter += 1;
         // if counter == 15 {
         //     loop {
@@ -44,21 +113,12 @@ fn main() -> ! {
         // }
 
         // update();
-        sleep();
-        sio::out_set(25);
         // update();
-        sleep();
-        sio::out_clr(25);
         // update();
         // // if gpio_in(15) == true {
         // if on == true {
-        //     sio::out_clr(25);
-        //     on = false
-        // } else {
-        //     sio::out_set(25);
         //     on = true
         // }
-        // sleep();
         // // }
         //
         // update();
@@ -109,7 +169,7 @@ fn sleep_for_cycles(cycle_count: u32) {
 }
 fn sleep() {
     unsafe {
-        for _ in 0..500_000 {
+        for _ in 0..500_00 {
             core::arch::asm!("nop");
         }
     }

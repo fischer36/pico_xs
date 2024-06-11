@@ -3,7 +3,7 @@ pub const SIO_GPIO_OUT_RW: u32 = SIO_BASE + 0x10;
 pub const SIO_GPIO_OUT_SET: u32 = SIO_BASE + 0x14;
 pub const SIO_GPIO_OUT_CLR: u32 = SIO_BASE + 0x18;
 pub const SIO_GPIO_OUT_XOR: u32 = SIO_BASE + 0x1C;
-
+pub const PPB_BASE: u32 = 0xe0000000;
 pub const RESETS_BASE: u32 = 0x4000C000;
 pub const RESETS_RESET_CLR: u32 = RESETS_BASE + 0x0 + 0x3000;
 
