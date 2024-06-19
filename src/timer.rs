@@ -1,14 +1,3 @@
-// void irq_set_mask_enabled(uint32_t mask, bool enabled) {
-//     if (enabled) {
-//         // Clear pending before enable
-//         // (if IRQ is actually asserted, it will immediately re-pend)
-//         *((io_rw_32 *) (PPB_BASE + M0PLUS_NVIC_ICPR_OFFSET)) = mask;
-//         *((io_rw_32 *) (PPB_BASE + M0PLUS_NVIC_ISER_OFFSET)) = mask;
-//     } else {
-//         *((io_rw_32 *) (PPB_BASE + M0PLUS_NVIC_ICER_OFFSET)) = mask;
-//     }
-// }
-
 use crate::regs;
 pub const TIMER0: u32 = regs::TIMER_BASE + 0x420;
 pub const TIMER1: u32 = regs::TIMER_BASE + 0x424;
@@ -32,7 +21,6 @@ pub fn set_timer() {
         let old = core::ptr::read_volatile(timer_inte);
         core::ptr::write_volatile(timer_inte, old | (1 << 0));
 
-        // Dynamically place your interrupt handler interrupt function pointer in the vtable.
         //
         // Enable interrupt handler
         const PPB_BASE: u32 = 0xe0000000;

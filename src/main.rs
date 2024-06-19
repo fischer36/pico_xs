@@ -1,28 +1,45 @@
 #![no_std]
 #![no_main]
 
-use cortex_m_rt::exception;
+use cortex_m_rt::{interrupt, ExceptionFrame};
 use rp_pico::entry;
+pub mod interrupt;
 pub mod io;
 pub mod pads;
 pub mod regs;
 pub mod reset;
 pub mod sio;
 pub mod timer;
+use cortex_m_rt::exception;
+static mut ha: bool = false;
+
+#[no_mangle]
+unsafe extern "C" fn my_custom_handler() {
+    #[allow(clippy::empty_loop)]
+    const hellos: u32 = 0xd000_0000;
+    loop {}
+}
+pub mod usb;
 pub mod vector_table;
 pub mod watchdog;
-use sio::out_set;
 use vector_table::VectorTable;
 static mut RAM_VTABLE: VectorTable = VectorTable::new();
-use watchdog::{did_reboot, update};
 static mut FIRED: bool = false;
 
-static mut twice: bool = false;
-extern "C" fn test_timer_irq0() {
-    sio::out_clr(25);
-    sleep();
-    sleep();
-    sio::out_set(25);
+extern "C" fn usb_irq0() {
+    unsafe {
+        if FIRED == false {
+            sio::out_set(25);
+        }
+    }
+}
+
+#[no_mangle]
+unsafe extern "C" fn test_timer_irq0() {
+    // sio::out_clr(25);
+    // sleep();
+    // sleep();
+    // sio::out_set(25);
     // unsafe {
     //     if twice == true {
     //         sio::out_set(25)
@@ -32,35 +49,38 @@ extern "C" fn test_timer_irq0() {
     //     twice = !twice
     // }
     // clear bit to disable interrupt lathced to timer
-    let timer_intrrupt: *mut u32 = (regs::TIMER_BASE + 0x34) as *mut u32;
-    unsafe {
-        let old = core::ptr::read_volatile(timer_intrrupt);
-        core::ptr::write_volatile(timer_intrrupt, old & !(1 << 0));
-    }
     unsafe {
         FIRED = true;
     }
+    // let timer_intrrupt: *mut u32 = (regs::TIMER_BASE + 0x34) as *mut u32;
+    // unsafe {
+    //     let old = core::ptr::read_volatile(timer_intrrupt);
+    //     core::ptr::write_volatile(timer_intrrupt, old & !(1 << 0));
+    // }
 }
-
 #[entry]
 fn main() -> ! {
     reset::reset();
-    // let mut pac = rp_pico::hal::pac::Peripherals::take().unwrap();
 
     let scb = unsafe { &*rp_pico::hal::pac::SCB::ptr() };
 
     // Read the current VTOR address
     // Copy the vector table from flash to RAM
-    let mut pac = rp_pico::hal::pac::Peripherals::take().unwrap();
-    let ppb = &mut pac.PPB;
-    unsafe {
-        RAM_VTABLE.init(ppb);
-        RAM_VTABLE.register_handler(
-            rp2040_hal::pac::Interrupt::TIMER_IRQ_0 as usize,
-            test_timer_irq0,
-        );
-    }
+    // let mut pac = rp_pico::hal::pac::Peripherals::take().unwrap();
+    // let ppb = &mut pac.PPB;
+    // unsafe {
+    //     RAM_VTABLE.init(ppb);
+    //     RAM_VTABLE.register_handler(
+    //         rp2040_hal::pac::Interrupt::TIMER_IRQ_0 as usize,
+    //         test_timer_irq0,
+    //     );
+    //     // RAM_VTABLE.register_handler(rp2040_hal::pac::Interrupt::USBCTRL_IRQ as usize, usb_irq0);
+    // }
 
+    // unsafe {
+    //     scb.vtor.write(&mut RAM_VTABLE as *mut _ as u32);
+    // }
+    sleep();
     sio::oe_clr(15);
     sio::out_clr(15);
     io::gpio_ctrl(15);
@@ -71,11 +91,11 @@ fn main() -> ! {
     io::gpio_ctrl(25);
     sio::oe_set(25);
 
-    sio::out_set(25);
+    // sio::out_set(25);
 
-    unsafe {
-        scb.vtor.write(&mut RAM_VTABLE as *mut _ as u32);
-    }
+    // usb::init();
+
+    sleep();
     timer::set_timer();
 
     //     on = false
@@ -88,22 +108,19 @@ fn main() -> ! {
     // }
     // let mut counter = 0;
     loop {
-        sleep();
-
         // sio::out_clr(25);
 
-        sleep();
-        // sio::out_set(25);
         unsafe {
             if FIRED == true {
-                // sio::out_clr(25);
-                loop {
-                    sio::out_clr(25);
-                    sleep();
-                    sio::out_set(25);
-                }
+                sleep();
+                continue;
             }
         }
+        // sio::out_set(25);
+        sleep();
+        sio::out_clr(25);
+        sleep();
+        sio::out_set(25);
 
         // counter += 1;
         // if counter == 15 {

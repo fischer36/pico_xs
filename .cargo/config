@@ -26,9 +26,11 @@ target = "thumbv6m-none-eabi"
 # * inline-threshold=5 makes the compiler more aggressive and inlining functions
 # * no-vectorize-loops turns off the loop vectorizer (seeing as the M0+ doesn't
 #   have SIMD)
+
 rustflags = [
     "-C", "link-arg=--nmagic",
-    "-C", "link-arg=-Tlink.x",
+    "-C", "link-arg=-Tmy_script.ld",
+    # "-C", "link-arg=-Tlink.x",
     "-C", "inline-threshold=5",
     "-C", "no-vectorize-loops",
 ]
