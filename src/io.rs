@@ -1,5 +1,12 @@
 use crate::regs;
-
+pub fn set_gpio_ctrl(gpio: u32, function: u32) {
+    let gpio_ctrl_offset: u32 = 0x4 + 0x8 * gpio;
+    let ctrl_register: *mut u32 = (regs::IO_BANK0_BASE + gpio_ctrl_offset) as *mut u32;
+    unsafe {
+        let value = ctrl_register.read_volatile();
+        ctrl_register.write_volatile((value & !0b11111) | function);
+    }
+}
 pub fn gpio_ctrl(gpio: u32) {
     let ctrl_offset = match gpio {
         15 => 0x07c,

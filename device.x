@@ -1,9 +1,10 @@
-PROVIDE(TIMER_IRQ_0 = test_timer_irq0);
-PROVIDE(TIMER_IRQ_1 = DefaultHandler);
-PROVIDE(TIMER_IRQ_2 = DefaultHandler);
-PROVIDE(TIMER_IRQ_3 = DefaultHandler);
+PROVIDE(TIMER_IRQ_0 = timer_irq_handler);
+PROVIDE(TIMER_IRQ_1 = timer_irq_handler);
+PROVIDE(TIMER_IRQ_2 = timer_irq_handler);
+PROVIDE(TIMER_IRQ_3 = timer_irq_handler);
+
 PROVIDE(PWM_IRQ_WRAP = DefaultHandler);
-PROVIDE(USBCTRL_IRQ = my_custom_handler);
+PROVIDE(USBCTRL_IRQ = usb_irq_handler);
 PROVIDE(XIP_IRQ = DefaultHandler);
 PROVIDE(PIO0_IRQ_0 = DefaultHandler);
 PROVIDE(PIO0_IRQ_1 = DefaultHandler);

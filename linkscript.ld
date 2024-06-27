@@ -24,7 +24,8 @@ INCLUDE memory.x
 
 /* # Entry point = reset vector */
 EXTERN(__RESET_VECTOR);
-EXTERN(test_timer_irq0)
+EXTERN(timer_irq_handler)
+EXTERN(usb_irq_handler)
 EXTERN(Reset);
 ENTRY(Reset);
 
@@ -36,7 +37,20 @@ EXTERN(__EXCEPTIONS); /* depends on all the these PROVIDED symbols */
 
 EXTERN(DefaultHandler);
 
-EXTERN(my_custom_handler)
+/* EXTERN(PWM_HANDLER); */
+/* EXTERN(USB_HANDLER); */
+/* EXTERN(XIP_HANDLER); */
+/* EXTERN(PIO_HANDLER); */
+/* EXTERN(DMA_HANDLER); */
+/* EXTERN(IO_HANDLER); */
+/* EXTERN(SIO_HANDLER); */
+/* EXTERN(CLOCKS_HANDLER); */
+/* EXTERN(SPI_HANDLER); */
+/* EXTERN(UART_HANDLER); */
+/* EXTERN(ADC_HANDLER); */
+/* EXTERN(I2C_HANDLER); */
+/* EXTERN(RTC_HANDLER); */
+ /*EXTERN(SW_HANDLER); */
 
 PROVIDE(NonMaskableInt = DefaultHandler);
 EXTERN(HardFaultTrampoline);
