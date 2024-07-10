@@ -2,6 +2,7 @@
 #![no_main]
 
 use regs::RESETS_RESET_CLR;
+pub const XOSC_CRYSTAL_FREQ: u32 = 12_000_000;
 const WATCHDOG_BASE: u32 = 0x40058000;
 const WATCHDOG_TICK: *mut u32 = (WATCHDOG_BASE + 0x2c) as *mut u32;
 const XOSC_BASE: u32 = 0x40024000 as u32;
@@ -31,6 +32,7 @@ const CLK_RTC_SELECTED: *mut u32 = (CLOCKS_BASE + 0x74) as *mut u32;
 const CLK_SYS_RESUS_CTRL: *mut u32 = (CLOCKS_BASE + 0x78) as *mut u32;
 const MHZ: u32 = 1_000_000;
 //pub mod __vectors;
+pub mod __vectors;
 pub mod final_utils;
 pub mod handlers;
 pub mod hardware;
@@ -43,11 +45,28 @@ pub mod reset;
 pub mod sio;
 pub mod timer;
 pub mod usb;
-use rp_pico::entry;
+//use cortex_m_rt::entry;
 use usb::usb_device_init;
+const SIO_BASE: u32 = 0xD0000000;
+const SPINLOCK_START_OFFSET: u32 = 0x100;
+fn clear_spinlocks() {
+    let spinlocks_base: *mut u32 = (0xd0000000_u32 + 0x100) as *mut u32;
 
-#[entry]
-fn main() -> ! {
+    const SPINLOCK_COUNT: usize = 32;
+    unsafe {
+        for i in 0..SPINLOCK_COUNT {
+            spinlocks_base.wrapping_add(i).write_volatile(1); // Write '1' to release the spinlock
+        }
+    }
+}
+// Borrowed from rp2040-boot2
+#[link_section = ".boot_loader"]
+#[used]
+pub static BOOT_LOADER: [u8; 256] = *include_bytes!("../boot2_w25q080.padded.bin");
+
+#[no_mangle]
+pub extern "C" fn main() -> ! {
+    clear_spinlocks();
     // Setup Chip
     {
         let mask = (1 << 6) | (1 << 9) | (1 << 13) | (1 << 12);

@@ -31,96 +31,136 @@ extern "C" {
     fn SWI_IRQ_3();
     fn SWI_IRQ_4();
     fn SWI_IRQ_5();
+    // Exceptions
+    fn NON_MASKABLE_INT();
+    fn HARD_FAULT();
+    fn MEMORY_MANAGEMENT();
+    fn BUS_FAULT();
+    fn USAGE_FAULT();
+    fn SECURE_FAULT();
+    fn SV_CALL();
+    fn DEBUG_MONITOR();
+    fn PEND_SV();
+    fn SYSTICK();
 }
 pub union Vector {
-    _handler: unsafe extern "C" fn(),
-    _reserved: u32,
+    handler: unsafe extern "C" fn(),
+    reserved: u32,
 }
 #[link_section = ".vector_table.interrupts"]
 #[no_mangle]
 pub static __INTERRUPTS: [Vector; 32] = [
     Vector {
-        _handler: TIMER_IRQ_0,
+        handler: TIMER_IRQ_0,
     },
     Vector {
-        _handler: TIMER_IRQ_1,
+        handler: TIMER_IRQ_1,
     },
     Vector {
-        _handler: TIMER_IRQ_2,
+        handler: TIMER_IRQ_2,
     },
     Vector {
-        _handler: TIMER_IRQ_3,
+        handler: TIMER_IRQ_3,
     },
     Vector {
-        _handler: PWM_IRQ_WRAP,
+        handler: PWM_IRQ_WRAP,
     },
     Vector {
-        _handler: USBCTRL_IRQ,
+        handler: USBCTRL_IRQ,
     },
-    Vector { _handler: XIP_IRQ },
+    Vector { handler: XIP_IRQ },
     Vector {
-        _handler: PIO0_IRQ_0,
-    },
-    Vector {
-        _handler: PIO0_IRQ_1,
+        handler: PIO0_IRQ_0,
     },
     Vector {
-        _handler: PIO1_IRQ_0,
+        handler: PIO0_IRQ_1,
     },
     Vector {
-        _handler: PIO1_IRQ_1,
+        handler: PIO1_IRQ_0,
     },
     Vector {
-        _handler: DMA_IRQ_0,
+        handler: PIO1_IRQ_1,
+    },
+    Vector { handler: DMA_IRQ_0 },
+    Vector { handler: DMA_IRQ_1 },
+    Vector {
+        handler: IO_IRQ_BANK0,
     },
     Vector {
-        _handler: DMA_IRQ_1,
+        handler: IO_IRQ_QSPI,
     },
     Vector {
-        _handler: IO_IRQ_BANK0,
+        handler: SIO_IRQ_PROC0,
     },
     Vector {
-        _handler: IO_IRQ_QSPI,
+        handler: SIO_IRQ_PROC1,
     },
     Vector {
-        _handler: SIO_IRQ_PROC0,
+        handler: CLOCKS_IRQ,
     },
+    Vector { handler: SPI0_IRQ },
+    Vector { handler: SPI1_IRQ },
+    Vector { handler: UART0_IRQ },
+    Vector { handler: UART1_IRQ },
     Vector {
-        _handler: SIO_IRQ_PROC1,
+        handler: ADC_IRQ_FIFO,
     },
+    Vector { handler: I2C0_IRQ },
+    Vector { handler: I2C1_IRQ },
+    Vector { handler: RTC_IRQ },
+    Vector { handler: SWI_IRQ_0 },
+    Vector { handler: SWI_IRQ_1 },
+    Vector { handler: SWI_IRQ_2 },
+    Vector { handler: SWI_IRQ_3 },
+    Vector { handler: SWI_IRQ_4 },
+    Vector { handler: SWI_IRQ_5 },
+];
+
+extern "C" {
+    fn Reset() -> !;
+    fn NonMaskableInt();
+    fn HardFault();
+    fn SVCall();
+    fn PendSV();
+    fn SysTick();
+}
+
+#[link_section = ".vector_table.reset_vector"]
+#[no_mangle]
+pub static __RESET_VECTOR: unsafe extern "C" fn() -> ! = Reset;
+
+// NMI, PendSV, SVCall SysTick, and HardFault are all system exceptions handled by system handlers.
+#[link_section = ".vector_table.exceptions"]
+pub static __EXCEPTIONS: [Vector; 14] = [
+    // Exception 2: Non Maskable Interrupt.
     Vector {
-        _handler: CLOCKS_IRQ,
+        handler: NonMaskableInt,
     },
-    Vector { _handler: SPI0_IRQ },
-    Vector { _handler: SPI1_IRQ },
-    Vector {
-        _handler: UART0_IRQ,
-    },
-    Vector {
-        _handler: UART1_IRQ,
-    },
-    Vector {
-        _handler: ADC_IRQ_FIFO,
-    },
-    Vector { _handler: I2C0_IRQ },
-    Vector { _handler: I2C1_IRQ },
-    Vector { _handler: RTC_IRQ },
-    Vector {
-        _handler: SWI_IRQ_0,
-    },
-    Vector {
-        _handler: SWI_IRQ_1,
-    },
-    Vector {
-        _handler: SWI_IRQ_2,
-    },
-    Vector {
-        _handler: SWI_IRQ_3,
-    },
-    Vector {
-        _handler: SWI_IRQ_4,
-    },
-    Vector {
-        _handler: SWI_IRQ_5,
-    },
+    // Exception 3: Hard Fault Interrupt.
+    Vector { handler: HardFault },
+    // Reserved 4-10
+    // Exception 4:
+    Vector { reserved: 0 },
+    // Exception 5:
+    Vector { reserved: 0 },
+    // Exception 6:
+    Vector { reserved: 0 },
+    // Exception 7
+    Vector { reserved: 0 },
+    // Exception 8
+    Vector { reserved: 0 },
+    // Exception 9
+    Vector { reserved: 0 },
+    // Exception 10
+    Vector { reserved: 0 },
+    // Exception 11: SV Call Interrupt.
+    Vector { handler: SVCall },
+    // Exception 12:
+    Vector { reserved: 0 },
+    // Exception 13:
+    Vector { reserved: 0 },
+    // Exception 14: Pend SV Interrupt
+    Vector { handler: PendSV },
+    // Exception 15: System Tick Interrupt.
+    Vector { handler: SysTick },
 ];

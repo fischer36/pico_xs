@@ -1,5 +1,4 @@
-use core::{marker::PhantomData, ops::Deref, slice};
-use vcell::VolatileCell;
+use core::slice;
 const USB_DRAM_ADDR: usize = 0x5010_0000;
 const USB_DPRAM_SIZE: usize = 4096;
 
@@ -23,43 +22,6 @@ const USB_BUF_CTRL_FULL: u32 = 0x8000;
 const USB_BUF_CTRL_DATA0_PID: u32 = 0x0000;
 const USB_BUF_CTRL_DATA1_PID: u32 = 0x2000;
 const USB_BUF_CTRL_LEN_MASK: u32 = 0x3ff;
-
-// DPRAM content for a USB Device
-#[repr(C)]
-pub struct DpramContent {
-    setup_packet: [VolatileCell<u8>; 8],
-    ep_ctrl: [EpCtrl; USB_NUM_ENDPOINTS - 1],
-    ep_buf_ctrl: [EpCtrl; USB_NUM_ENDPOINTS],
-
-    ep0_buf_a: [VolatileCell<u8>; 0x40],
-    _ep0_buf_b: [VolatileCell<u8>; 0x40],
-
-    exp_data: [VolatileCell<u8>; USB_DPRAM_SIZE - 0x180],
-}
-
-pub struct UsbDpram {
-    _marker: PhantomData<*const ()>,
-}
-unsafe impl Send for UsbDpram {}
-impl UsbDpram {
-    #[inline(always)]
-    pub const fn ptr() -> *const DpramContent {
-        0x5010_0000 as *const _
-    }
-}
-impl Deref for UsbDpram {
-    type Target = DpramContent;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        unsafe { &*UsbDpram::ptr() }
-    }
-}
-
-#[repr(C)]
-struct EpCtrl {
-    in_v: VolatileCell<u32>,
-    out: VolatileCell<u32>,
-}
 
 #[repr(C)]
 #[repr(packed)]
@@ -122,27 +84,6 @@ struct EndPointDescriptor {
     bInterval: u8,
 }
 
-struct EndpointConfig {
-    descriptor: &'static EndPointDescriptor,
-
-    handler: fn(&mut UsbDevice, &[VolatileCell<u8>], u32),
-    endpoint_control: Option<*const VolatileCell<u32>>,
-    buffer_control: *const VolatileCell<u32>,
-    data_buffer: &'static [VolatileCell<u8>],
-
-    next_pid: u8,
-}
-
-impl EndpointConfig {
-    fn is_tx(&self) -> bool {
-        (self.descriptor.bEndpointAddress & USB_DIR_IN) == USB_DIR_IN
-    }
-}
-
-struct UsbDeviceConfiguration {
-    endpoints: [Option<EndpointConfig>; USB_NUM_ENDPOINTS],
-}
-
 // Descriptors
 static USB_DEVICE_DESCRIPTOR: DeviceDescriptor = DeviceDescriptor {
     bLength: core::mem::size_of::<DeviceDescriptor>() as u8,
@@ -188,20 +129,8 @@ static USB_CONFIG_DESCRIPTOR: ConfigDescriptor = ConfigDescriptor {
 };
 
 // Intentionally empty
-fn ep0_out_handler(_usb: &mut UsbDevice, _buff: &[VolatileCell<u8>], _len: u32) {}
 
 const ADDR_ENDP: *mut u32 = (0x50110000) as *mut u32;
-
-fn ep0_in_handler(usb: &mut UsbDevice, _buff: &[VolatileCell<u8>], _len: u32) {
-    unsafe {
-        if SHOULD_SET_ADDRESS {
-            crate::modify_register(ADDR_ENDP, crate::create_bitmask(0, 6), DEV_ADDR as u32);
-            SHOULD_SET_ADDRESS = false;
-        } else {
-            affirm(usb.ep0_out_ref);
-        }
-    }
-}
 
 const LANG_DESCRIPTOR: [u8; 4] = [4, 0x03, 0x09, 0x04];
 
@@ -239,21 +168,11 @@ static EP0_IN: EndPointDescriptor = EndPointDescriptor {
     bInterval: 0,
 };
 
-pub struct UsbDevice {
-    config: UsbDeviceConfiguration,
-    ep0_in_ref: *mut EndpointConfig,
-    ep0_out_ref: *mut EndpointConfig,
-}
+pub struct UsbDevice {}
 
 impl UsbDevice {
-    fn new(config: UsbDeviceConfiguration) -> Self {
-        let a = core::ptr::from_ref(config.endpoints[0].as_ref().unwrap()) as *mut EndpointConfig;
-        let b = core::ptr::from_ref(config.endpoints[1].as_ref().unwrap()) as *mut EndpointConfig;
-        Self {
-            config,
-            ep0_in_ref: b,
-            ep0_out_ref: a,
-        }
+    fn new() -> Self {
+        Self {}
     }
 
     // Run USB
@@ -291,21 +210,11 @@ impl UsbDevice {
                         );
                         SHOULD_SET_ADDRESS = false;
                     } else {
-                        affirm(self.ep0_out_ref);
+                        affirm();
                     }
                 }
             }
         }
-    }
-    fn get_endpoint_configuration_mut(
-        &mut self,
-        endpoint_address: u8,
-    ) -> Option<&mut EndpointConfig> {
-        self.config
-            .endpoints
-            .iter_mut()
-            .filter_map(|c| c.as_mut())
-            .find(|cfg| cfg.descriptor.bEndpointAddress == endpoint_address)
     }
 
     pub fn configured(&self) -> bool {
@@ -314,7 +223,6 @@ impl UsbDevice {
 
     fn handle_setup_packet(&mut self) {
         let setup_packet = unsafe { UsbSetupPacket::from_raw(0x50100000 as *mut u8) };
-        let ep0_in_config = self.config.endpoints[1].as_mut().unwrap();
         unsafe {
             EP0_IN_NEXT_PID = 1;
         }
@@ -358,7 +266,6 @@ impl UsbDevice {
                         USB_DT_DEVICE => {
                             let device_descriptor =
                                 &USB_DEVICE_DESCRIPTOR as *const DeviceDescriptor;
-                            let ep = self.config.endpoints[1].as_mut().unwrap();
                             unsafe {
                                 EP0_IN_NEXT_PID = 1;
                             }
@@ -370,29 +277,21 @@ impl UsbDevice {
                             };
                             let len = data.len();
                             let data = Some(data);
-                            //self.start_transfer(EP0_IN_ADDR, data.len() as u32, Some(data));
                             unsafe {
                                 let mut val = len as u32 | USB_BUF_CTRL_AVAIL;
-
-                                let ep_config =
-                                    self.get_endpoint_configuration_mut(EP0_IN_ADDR).unwrap();
                                 let buff_ptr: &mut [u8] = slice::from_raw_parts_mut(EP0_BUFF, 0x40);
 
-                                if ep_config.is_tx() {
-                                    if let Some(data) = data {
-                                        // Copy data into USB memory
+                                if let Some(data) = data {
+                                    // Copy data into USB memory
 
-                                        for (index, byte) in data.iter().enumerate() {
-                                            buff_ptr[index] = *byte;
-                                            //ep_config.data_buffer[index].set(*byte);
-                                        }
-                                    } else {
-                                        assert!(len == 0);
+                                    for (index, byte) in data.iter().enumerate() {
+                                        buff_ptr[index] = *byte;
+                                        //ep_config.data_buffer[index].set(*byte);
                                     }
-
-                                    // Mark buffer as full
-                                    val |= USB_BUF_CTRL_FULL;
                                 }
+
+                                // Mark buffer as full
+                                val |= USB_BUF_CTRL_FULL;
 
                                 val |= if EP0_IN_NEXT_PID == 1 {
                                     USB_BUF_CTRL_DATA1_PID
@@ -401,7 +300,6 @@ impl UsbDevice {
                                 };
 
                                 EP0_IN_NEXT_PID ^= 1;
-                                //ep_config.next_pid ^= 1;
 
                                 EP0_IN_BUFFER_CTRL.write_volatile(val);
                             }
@@ -433,50 +331,26 @@ impl UsbDevice {
                                     let data_len = data.len();
                                     buff[buf_index..buf_index + data_len].copy_from_slice(data);
                                     buf_index += data_len;
-                                    for i in 2..USB_NUM_ENDPOINTS {
-                                        if let Some(endpoint) = &self.config.endpoints[i] {
-                                            let endpoint_descriptor = endpoint.descriptor;
-                                            let data = unsafe {
-                                                slice::from_raw_parts(
-                                                    (endpoint_descriptor
-                                                        as *const EndPointDescriptor)
-                                                        as *const u8,
-                                                    core::mem::size_of::<EndPointDescriptor>(),
-                                                )
-                                            };
-                                            let data_len = data.len();
-                                            buff[buf_index..buf_index + data_len]
-                                                .copy_from_slice(data);
-                                            buf_index += data_len;
-                                        }
-                                    }
                                 }
                             }
 
                             let len = buf_index;
                             let data = Some(&buff[..len]);
-                            //start_transferxd(self.ep0_in_ref, data_len as u32, Some(&buff[..data_len]));
                             unsafe {
                                 let mut val = len as u32 | USB_BUF_CTRL_AVAIL;
 
-                                let ep_config =
-                                    self.get_endpoint_configuration_mut(EP0_IN_ADDR).unwrap();
                                 let buff_ptr: &mut [u8] = slice::from_raw_parts_mut(EP0_BUFF, 0x40);
-                                if ep_config.is_tx() {
-                                    if let Some(data) = data {
-                                        // Copy data into USB memory
-
-                                        for (index, byte) in data.iter().enumerate() {
-                                            buff_ptr[index] = *byte;
-                                            //ep_config.data_buffer[index].set(*byte);
-                                        }
-                                    } else {
-                                        assert!(len == 0);
+                                if let Some(data) = data {
+                                    for (index, byte) in data.iter().enumerate() {
+                                        buff_ptr[index] = *byte;
+                                        //ep_config.data_buffer[index].set(*byte);
                                     }
-
-                                    // Mark buffer as full
-                                    val |= USB_BUF_CTRL_FULL;
+                                } else {
+                                    assert!(len == 0);
                                 }
+
+                                // Mark buffer as full
+                                val |= USB_BUF_CTRL_FULL;
 
                                 val |= if EP0_IN_NEXT_PID == 1 {
                                     USB_BUF_CTRL_DATA1_PID
@@ -511,24 +385,20 @@ impl UsbDevice {
                             unsafe {
                                 let mut val = len as u32 | USB_BUF_CTRL_AVAIL;
                                 let data = Some(&ep_buffer[..len]);
-                                let ep_config =
-                                    self.get_endpoint_configuration_mut(EP0_IN_ADDR).unwrap();
                                 let buff_ptr: &mut [u8] = slice::from_raw_parts_mut(EP0_BUFF, 0x40);
-                                if ep_config.is_tx() {
-                                    if let Some(data) = data {
-                                        // Copy data into USB memory
+                                if let Some(data) = data {
+                                    // Copy data into USB memory
 
-                                        for (index, byte) in data.iter().enumerate() {
-                                            buff_ptr[index] = *byte;
-                                            //ep_config.data_buffer[index].set(*byte);
-                                        }
-                                    } else {
-                                        assert!(len == 0);
+                                    for (index, byte) in data.iter().enumerate() {
+                                        buff_ptr[index] = *byte;
+                                        //ep_config.data_buffer[index].set(*byte);
                                     }
-
-                                    // Mark buffer as full
-                                    val |= USB_BUF_CTRL_FULL;
+                                } else {
+                                    assert!(len == 0);
                                 }
+
+                                // Mark buffer as full
+                                val |= USB_BUF_CTRL_FULL;
 
                                 val |= if EP0_IN_NEXT_PID == 1 {
                                     USB_BUF_CTRL_DATA1_PID
@@ -550,7 +420,7 @@ impl UsbDevice {
         }
     }
 }
-pub fn affirm(ep: *mut EndpointConfig) {
+pub fn affirm() {
     let mut val = 0 | USB_BUF_CTRL_AVAIL;
     let endpoint_addr = EP0_OUT_ADDR;
     unsafe {
@@ -591,8 +461,6 @@ impl UsbSetupPacket {
         }
     }
 }
-static mut EP0_IN_REF: *mut Option<EndpointConfig> = core::ptr::null_mut();
-static mut EP0_OUT_REF: *mut Option<EndpointConfig> = core::ptr::null_mut();
 static mut EP0_IN_NEXT_PID: u8 = 0;
 static mut EP0_OUT_NEXT_PID: u8 = 0;
 use crate::regs::RESETS_BASE;
@@ -606,9 +474,6 @@ pub fn usb_device_init() -> UsbDevice {
         core::ptr::write_volatile(RESETS_BASE as *mut u32, old & !(1 << 24));
     }
 
-    let dpram = UsbDpram {
-        _marker: PhantomData,
-    };
     //
     //let dpram_start = UsbDpram::ptr() as *mut u8;
     //
@@ -631,46 +496,17 @@ pub fn usb_device_init() -> UsbDevice {
     const USB_INTE: *mut u32 = (USBCTRL_REGS_BASE + 0x90) as *mut u32;
     crate::set_bits(USB_INTE, 1 << 4 | 1 << 16 | 1 << 12);
 
-    let endpoints = unsafe {
-        [
-            Some(EndpointConfig {
-                descriptor: &EP0_OUT,
-                handler: ep0_out_handler,
-                endpoint_control: None,
-                buffer_control: &dpram.ep_buf_ctrl[0].out as *const _,
-                // Data buffer is shared with EP0_IN
-                data_buffer: slice::from_raw_parts(dpram.ep0_buf_a.as_ptr(), 0x40),
-                next_pid: 0,
-            }),
-            Some(EndpointConfig {
-                descriptor: &EP0_IN,
-                handler: ep0_in_handler,
-                endpoint_control: None,
-                buffer_control: &dpram.ep_buf_ctrl[0].in_v as *const _,
-                // Data buffer is shared with EP0_OUT
-                data_buffer: slice::from_raw_parts(dpram.ep0_buf_a.as_ptr(), 0x40),
-                next_pid: 0,
-            }),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        ]
-    };
+    //let endpoints = unsafe {
+    //    [
+    //        Some(EndpointConfig {
+    //            descriptor: &EP0_OUT,
+    //        }),
+    //        Some(EndpointConfig {
+    //            descriptor: &EP0_IN,
+    //        }),
 
-    let usb_config: UsbDeviceConfiguration = UsbDeviceConfiguration { endpoints };
     crate::set_bits(SIE_CTRL, 1 << 16);
-    UsbDevice::new(usb_config)
+    UsbDevice::new()
 }
 
 #[allow(non_snake_case)]

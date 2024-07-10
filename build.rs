@@ -1,6 +1,6 @@
 fn main() {
     cc::Build::new()
-        .file("src/c/usb_init.c") // Path to your C file
+        .file("src/c/reset.c") // Path to your C file
         .file("src/asm/asm.s") // Path
         .include("/home/thinkerpad/pi/pico/pico-sdk/src/c")
         .compile("usb_init"); // Compiles and links the C code into a static library
