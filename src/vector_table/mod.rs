@@ -1,4 +1,15 @@
+mod exceptions;
+mod interrupts;
 extern "C" {
+    // RESET HANDLER (RESET_HANDLER.c)
+    fn Reset() -> !;
+    // EXCEPTION HANDLERS (EXCEPTIONS.rs)
+    fn NonMaskableInt();
+    fn HardFault();
+    fn SVCall();
+    fn PendSV();
+    fn SysTick();
+    // INTERRUPT HANDLERS (INTERRUPTS.rs)
     fn TIMER_IRQ_0();
     fn TIMER_IRQ_1();
     fn TIMER_IRQ_2();
@@ -31,22 +42,17 @@ extern "C" {
     fn SWI_IRQ_3();
     fn SWI_IRQ_4();
     fn SWI_IRQ_5();
-    // Exceptions
-    fn NON_MASKABLE_INT();
-    fn HARD_FAULT();
-    fn MEMORY_MANAGEMENT();
-    fn BUS_FAULT();
-    fn USAGE_FAULT();
-    fn SECURE_FAULT();
-    fn SV_CALL();
-    fn DEBUG_MONITOR();
-    fn PEND_SV();
-    fn SYSTICK();
 }
+
 pub union Vector {
     handler: unsafe extern "C" fn(),
     reserved: u32,
 }
+
+#[link_section = ".vector_table.reset_vector"]
+#[no_mangle]
+pub static __RESET_VECTOR: unsafe extern "C" fn() -> ! = Reset;
+
 #[link_section = ".vector_table.interrupts"]
 #[no_mangle]
 pub static __INTERRUPTS: [Vector; 32] = [
@@ -116,22 +122,10 @@ pub static __INTERRUPTS: [Vector; 32] = [
     Vector { handler: SWI_IRQ_5 },
 ];
 
-extern "C" {
-    fn Reset() -> !;
-    fn NonMaskableInt();
-    fn HardFault();
-    fn SVCall();
-    fn PendSV();
-    fn SysTick();
-}
-
-#[link_section = ".vector_table.reset_vector"]
-#[no_mangle]
-pub static __RESET_VECTOR: unsafe extern "C" fn() -> ! = Reset;
-
-// NMI, PendSV, SVCall SysTick, and HardFault are all system exceptions handled by system handlers.
 #[link_section = ".vector_table.exceptions"]
 pub static __EXCEPTIONS: [Vector; 14] = [
+    // NMI, PendSV, SVCall SysTick, and HardFault are all system exceptions handled by system handlers.
+    //
     // Exception 2: Non Maskable Interrupt.
     Vector {
         handler: NonMaskableInt,

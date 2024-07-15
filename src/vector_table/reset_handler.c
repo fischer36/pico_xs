@@ -2,7 +2,7 @@
 #include <stdint.h>
 
 // Declare symbols from the linker script for memory boundaries
-extern int main(void);
+extern int entry(void);
 extern uint32_t __sidata, __sdata, __edata, __sbss, __ebss;
 
 void Reset(void) {
@@ -21,7 +21,7 @@ void Reset(void) {
   }
 
   // Call the main application
-  main();
+  entry();
 
   // In case main returns, ensure a safe hang
   while (1) {
