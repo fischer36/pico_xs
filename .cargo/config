@@ -16,7 +16,7 @@ target = "thumbv6m-none-eabi"
 
 rustflags = [
     "-C", "link-arg=--nmagic",
-    "-C", "link-arg=-Tlinkscript.ld",
+    "-C", "link-arg=-Tlink.ld",
     # "-C", "link-arg=-Tlink.x",
     "-C", "inline-threshold=5",
     "-C", "no-vectorize-loops",

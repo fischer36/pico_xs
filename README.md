@@ -1,5 +1,6 @@
 # pico_xs
 A completely dependency-free, bare-metal hardware abstraction layer for the Raspberry Pi Pico microcontroller.
+
 ## Getting Started
 ### Step 1: Clone the repository
 Clone the `pico_xs` repository to your system using Git. Open your terminal and run:

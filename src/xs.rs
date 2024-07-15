@@ -1,4 +1,4 @@
-//! # XS (Extra-Small)
+//! # Pico-XS (Extra-Small)
 //!
 //! `xs.rs`: collection of generic embedded utilities.
 
