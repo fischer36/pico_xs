@@ -1,6 +1,14 @@
+pub mod clocks;
 pub mod io_bank;
+pub mod pads_bank;
+pub mod ppb;
 pub mod resets;
 pub mod sio;
+pub mod uart;
+pub mod usb_ctrl;
+pub mod watchdog;
+pub mod xosc;
+
 pub const THIRTY_TWO_BITS: u32 = 0b_1001_0101_0101_0101_0101_0101_0101_0101;
 pub const ROM_BASE: u32 = 0x00000000;
 pub const XIP_BASE: u32 = 0x10000000;
@@ -29,7 +37,6 @@ pub const RESETS_BASE: u32 = 0x4000c000;
 pub const PSM_BASE: u32 = 0x40010000;
 pub const IO_BANK0_BASE: u32 = 0x40014000;
 pub const IO_QSPI_BASE: u32 = 0x40018000;
-pub const PADS_BANK0_BASE: u32 = 0x4001c000;
 pub const PADS_QSPI_BASE: u32 = 0x40020000;
 pub const XOSC_BASE: u32 = 0x40024000;
 pub const PLL_SYS_BASE: u32 = 0x40028000;

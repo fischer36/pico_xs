@@ -1,10 +1,11 @@
 use crate::xs::Bits;
 const BASE: u32 = 0x4000C000;
 
-const RESET_DONE: *mut u32 = (BASE + 0x8) as *mut u32;
-const RESET_CLR: *mut u32 = (BASE + 0x3000) as *mut u32;
+const RESETS_RESET: *mut u32 = (BASE + 0x0) as *mut u32;
+const RESETS_DONE: *mut u32 = (BASE + 0x8) as *mut u32;
+const RESETS_CLR: *mut u32 = (BASE + 0x3000) as *mut u32;
 
-const RESET_MASK: u32 = 0b_00000001111111111111111111111111;
+pub const RESET_MASK: u32 = 0b_00000001111111111111111111111111;
 
 /// Resets peripherals specified in the mask and waits for them to be out of reset.
 ///
@@ -56,11 +57,20 @@ const RESET_MASK: u32 = 0b_00000001111111111111111111111111;
 /// ```
 pub fn reset_wait(mask: u32) {
     unsafe {
-        // Modify bits in RESET_CLR to reset
-        RESET_CLR.modify(RESET_MASK, mask);
-        // Wait until RESET_DONE indicates all specified peripherals are out of reset
-        while RESET_DONE.bits(RESET_MASK) & mask == 0 {
+        // Modify bits in RESETS_CLR to reset
+        RESETS_CLR.modify(RESET_MASK, mask);
+        // Wait until RESETS_DONE indicates all specified peripherals are out of reset
+        while RESETS_DONE.bits(RESET_MASK) & mask == 0 {
             core::arch::asm!("nop");
         }
     }
+}
+pub fn reset_start(mask: u32) {
+    // Set bits in RESETS_RESET to start reset
+    RESETS_RESET.modify(RESET_MASK, mask);
+}
+
+pub fn reset_stop(mask: u32) {
+    // Set bits in RESETS_RESET to stop reset
+    RESETS_RESET.clear(mask);
 }

@@ -28,6 +28,8 @@ pub mod vector_table;
 
 /// GPIO module for general-purpose input/output functionalities.
 pub mod gpio;
+/// USB module.
+pub mod usb_xs;
 /// Extended support and utility functions.
 pub mod xs;
 

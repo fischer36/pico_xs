@@ -99,9 +99,7 @@ unsafe extern "C" fn SPI1_IRQ() -> ! {
 }
 
 #[no_mangle]
-unsafe extern "C" fn UART0_IRQ() -> ! {
-    loop {}
-}
+unsafe extern "C" fn UART0_IRQ() {}
 
 #[no_mangle]
 unsafe extern "C" fn UART1_IRQ() -> ! {

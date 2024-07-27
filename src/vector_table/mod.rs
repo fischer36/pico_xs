@@ -13,6 +13,8 @@ pub static __RESET_VECTOR: unsafe extern "C" fn() -> ! = Reset;
 
 #[link_section = ".vector_table.exceptions"]
 pub static __EXCEPTIONS: [Vector; 14] = [
+    // NMI, PendSV, SVCall SysTick, and HardFault are all system exceptions handled by system handlers.
+    //
     // Exception 2: Non Maskable Interrupt.
     Vector {
         handler: NonMaskableInt,
@@ -130,7 +132,6 @@ fn panic(_info: &core::panic::PanicInfo) -> ! {
     }
 }
 
-// Extern Declarations
 extern "C" {
     // RESET HANDLER (RESET_HANDLER.c)
     fn Reset() -> !;
@@ -141,6 +142,7 @@ extern "C" {
     fn PendSV();
     fn SysTick();
     // INTERRUPT HANDLERS (INTERRUPTS.rs)
+    fn uart_irq();
     fn TIMER_IRQ_0();
     fn TIMER_IRQ_1();
     fn TIMER_IRQ_2();

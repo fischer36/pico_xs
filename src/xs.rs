@@ -18,14 +18,14 @@ pub trait Bits<T> {
     /// # Parameters
     ///
     /// - `bits`: Mask of bits to clear.
-    fn clear(self, bits: T);
+    fn clear(&self, bits: T);
 
     /// Sets specified bits.
     ///
     /// # Parameters
     ///
     /// - `bits`: Mask of bits to set.
-    fn set(self, bits: T);
+    fn set(&self, bits: T);
 
     /// Modifies bits by clearing and setting based on the mask.
     ///
@@ -33,14 +33,14 @@ pub trait Bits<T> {
     ///
     /// - `mask`: Mask of bits to clear.
     /// - `bits`: Bits to set within the cleared mask.
-    fn modify(self, mask: T, bits: T);
+    fn modify(&self, mask: T, bits: T);
 
     /// Xor bits
     ///
     /// # Parameters
     ///
     /// - `bits`: Bits to xor.
-    fn xor(self, bits: T);
+    fn xor(&self, bits: T);
 
     /// Reads specified bits.
     ///
@@ -53,32 +53,32 @@ pub trait Bits<T> {
     ///
     /// - Returns the value of the bits that are set in the mask. The returned value
     ///   has the bits in their original positions.
-    fn bits(self, mask: T) -> T;
+    fn bits(&self, mask: T) -> T;
 }
 
 impl Bits<u32> for *mut u32 {
-    fn clear(self, bits: u32) {
+    fn clear(&self, bits: u32) {
         unsafe {
-            write_volatile(self, read_volatile(self) & !bits);
+            write_volatile(*self, read_volatile(*self) & !bits);
         }
     }
-    fn set(self, bits: u32) {
+    fn set(&self, bits: u32) {
         unsafe {
-            write_volatile(self, read_volatile(self) | bits);
+            write_volatile(*self, read_volatile(*self) | bits);
         }
     }
-    fn modify(self, mask: u32, bits: u32) {
+    fn modify(&self, mask: u32, bits: u32) {
         unsafe {
-            write_volatile(self, (read_volatile(self) & !mask) | (mask & bits));
+            write_volatile(*self, (read_volatile(*self) & !mask) | (mask & bits));
         }
     }
-    fn xor(self, bits: u32) {
+    fn xor(&self, bits: u32) {
         unsafe {
-            write_volatile(self, read_volatile(self) ^ bits);
+            write_volatile(*self, read_volatile(*self) ^ bits);
         }
     }
-    fn bits(self, mask: u32) -> u32 {
-        unsafe { read_volatile(self) & mask }
+    fn bits(&self, mask: u32) -> u32 {
+        unsafe { read_volatile(*self) & mask }
     }
 }
 
@@ -87,5 +87,11 @@ pub fn sleep() {
         for _ in 0..50_000 {
             core::arch::asm!("nop");
         }
+    }
+}
+
+pub fn nop() {
+    unsafe {
+        core::arch::asm!("nop");
     }
 }
