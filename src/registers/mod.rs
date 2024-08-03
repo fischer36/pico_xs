@@ -1,9 +1,10 @@
 pub mod clocks;
 pub mod io_bank;
 pub mod pads_bank;
-pub mod ppb;
+pub mod ppb_base;
 pub mod resets;
 pub mod sio;
+pub mod timer;
 pub mod uart;
 pub mod usb_ctrl;
 pub mod watchdog;

@@ -4,7 +4,11 @@ const BASE: u32 = 0x4000C000;
 const RESETS_RESET: *mut u32 = (BASE + 0x0) as *mut u32;
 const RESETS_DONE: *mut u32 = (BASE + 0x8) as *mut u32;
 const RESETS_CLR: *mut u32 = (BASE + 0x3000) as *mut u32;
-
+pub const RESET_BIT_PLL_SYS: u32 = 1 << 12;
+pub const RESET_BIT_PLL_USB: u32 = 1 << 13;
+pub const RESET_BIT_TIMER: u32 = 1 << 21;
+pub const RESET_BIT_UART0: u32 = 1 << 22;
+pub const RESET_BIT_UART1: u32 = 1 << 23;
 pub const RESET_MASK: u32 = 0b_00000001111111111111111111111111;
 
 /// Resets peripherals specified in the mask and waits for them to be out of reset.
@@ -52,7 +56,7 @@ pub const RESET_MASK: u32 = 0b_00000001111111111111111111111111;
 /// # Example
 ///
 /// ```
-/// // Reset and wait for IO_BANK0 (5) and PADS_BANK0 (8) to be out of reset
+/// // Reset and wait to be out of reset
 /// reset_wait(1<<5|1<<8);
 /// ```
 pub fn reset_wait(mask: u32) {

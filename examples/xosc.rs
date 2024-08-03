@@ -2,12 +2,15 @@
 #![no_main]
 
 extern crate pico_xs as hal;
-use hal::{gpio, registers, xs};
+use hal::{
+    gpio,
+    registers::{self, xosc},
+    xs,
+};
 
 #[no_mangle]
 pub extern "C" fn main() -> ! {
     registers::xosc::init();
-    registers::clocks::init();
     registers::resets::reset_wait(1 << 5);
     let mut gpio = gpio::Gpio::new(25);
     gpio.oe.clr();
