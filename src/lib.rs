@@ -36,8 +36,9 @@ pub mod xs;
 // Holds the embedded stage-2 bootloader, required for initializing the RP2040 microcontroller
 // (borrowed from rp2040-boot2 for now).
 #[link_section = ".boot_loader"]
+#[no_mangle]
 #[used]
-pub static BOOT_LOADER: [u8; 256] = *include_bytes!("../boot2.bin");
+pub static BOOT2_FIRMWARE: [u8; 256] = *include_bytes!("../boot2.bin");
 
 /// System entry point, called on by the reset handler on microcontroller reset.
 /// Initializes hardware by clearing spinlocks and jumping to the user-defined `main` function.
@@ -52,7 +53,7 @@ pub extern "C" fn entry() -> ! {
 /// External declaration of the main function that is implemented by the user.
 /// This function should never return and is the entry point for application logic.
 extern "Rust" {
-    fn main() -> !;
+    pub fn main() -> !;
 }
 
 /// Clears all hardware spinlocks at a predefined base address, ensuring that

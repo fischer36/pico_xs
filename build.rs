@@ -1,29 +1,30 @@
 use std::env;
-use std::fs;
-use std::path::{Path, PathBuf};
+use std::fs::File;
+use std::io::Write;
+use std::path::PathBuf;
+
 fn main() {
-    // println!("cargo:rustc-env=TARGET=thumbv6m-none-eabi");
     cc::Build::new()
+        .include("src/include")
         .file("src/vector_table/reset_handler.c")
-        .file("src/asm/asm.s")
-        .compile("ffi"); // Compiles and links the C code into a static library
+        .compile("ffi");
 
-    // Handling memory.x
-    let out_dir = env::var("OUT_DIR").unwrap();
-    let memory_x_path = PathBuf::from(&out_dir).join("memory.x");
-    fs::copy("memory.x", &memory_x_path).unwrap();
-    println!(
-        "cargo:rustc-link-search={}",
-        memory_x_path.parent().unwrap().display() // Ensure the directory is added to the linker search path
-    );
+    // Put `boot2.bin` in our output directory and ensure it's on the linker search path.
+    let out = PathBuf::from(env::var_os("OUT_DIR").unwrap());
+    File::create(out.join("boot2.bin"))
+        .unwrap()
+        .write_all(include_bytes!("boot2.bin"))
+        .unwrap();
 
-    // Handling link.ld
-    let link_ld_path = PathBuf::from(&out_dir).join("link.ld");
-    fs::copy("link.ld", &link_ld_path).unwrap();
-    println!("cargo:rustc-link-arg=-T{}", link_ld_path.display()); // Pass the linker script to the linker
+    println!("cargo:rustc-link-lib=static=ffi");
+    println!("cargo:rustc-Cllvm-args=--inline-threshold=5"); // Set inline threshold
+    println!("cargo:rustc-link-search={}", out.display());
+    println!("cargo:rustc-link-arg=--nmagic");
 
-    // Specify files to watch for changes
-    println!("cargo:rerun-if-changed=memory.x");
-    println!("cargo:rerun-if-changed=link.ld");
-    println!("cargo:rerun-if-changed=src/vector_table/reset_handler.c");
+    // Include `link.ld` at compile time, create it in the output directory, and write contents
+    let link = include_bytes!("link.ld");
+    let mut link_file = File::create(out.join("link.ld")).unwrap();
+    link_file.write_all(link).unwrap();
+    let linker_script_path = out.join("link.ld");
+    println!("cargo:rustc-link-arg=-T{}", linker_script_path.display());
 }

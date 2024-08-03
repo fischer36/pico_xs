@@ -1,32 +1,25 @@
-/* # Developer notes
+MEMORY {
+    BOOT_LOADER : ORIGIN = 0x10000000, LENGTH = 0x100
+    FLASH : ORIGIN = 0x10000100, LENGTH = 2048K - 0x100
+    RAM   : ORIGIN = 0x20000000, LENGTH = 256K
+}
+EXTERN(BOOT2_FIRMWARE)
+SECTIONS {
+  /* ### Boot loader */
+  .boot_loader ORIGIN(BOOT_LOADER) :
+  {
+    KEEP(*(.boot_loader*));
+  } > BOOT_LOADER
 
-- Symbols that start with a double underscore (__) are considered "private"
+} INSERT BEFORE .text;
 
-- Symbols that start with a single underscore (_) are considered "semi-public"; they can be
-  overridden in a user linker script, but should not be referred from user code (e.g. `extern "C" {
-  static mut __sbss }`).
-
-- `EXTERN` forces the linker to keep a symbol in the final binary. We use this to make sure a
-  symbol if not dropped if it appears in or near the front of the linker arguments and "it's not
-  needed" by any of the preceding objects (linker arguments)
-
-- `PROVIDE` is used to provide default values that can be overridden by a user linker script
-
-- On alignment: it's important for correctness that the VMA boundaries of both .bss and .data *and*
-  the LMA of .data are all 4-byte aligned. These alignments are assumed by the RAM initialization
-  routine. There's also a second benefit: 4-byte aligned boundaries means that you won't see
-  "Address (..) is out of bounds" in the disassembly produced by `objdump`.
-*/
-
-/* Provides information about the memory layout of the device */
-/* This will be provided by the user (see `memory.x`) or by a Board Support Crate */
-INCLUDE memory.x
+/* INCLUDE memory.x */
 
 /* # Entry point = reset vector */
 EXTERN(__RESET_VECTOR);
 EXTERN(RESET);
-
 ENTRY(RESET);
+
 
 /* # Exception vectors */
 /* This is effectively weak aliasing at the linker level */
@@ -93,7 +86,6 @@ PROVIDE(SV_CALL = DefaultHandler);
 PROVIDE(PEND_SV = DefaultHandler);
 PROVIDE(SYS_TICK = DefaultHandler);
 
-EXTERN(HardFaultTrampoline);
 PROVIDE(MemoryManagement = DefaultHandler);
 PROVIDE(BusFault = DefaultHandler);
 PROVIDE(UsageFault = DefaultHandler);
@@ -329,4 +321,3 @@ ASSERT(SIZEOF(.vector_table) <= 0xc0, "
 There can't be more than 32 interrupt handlers. This may be a bug in
 your device crate, or you may have registered more than 32 interrupt
 handlers.");
-
