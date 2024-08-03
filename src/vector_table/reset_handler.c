@@ -5,7 +5,7 @@
 extern int entry(void);
 extern uint32_t __sidata, __sdata, __edata, __sbss, __ebss;
 
-void Reset(void) {
+void RESET(void) {
   uint32_t *source;
   uint32_t *destination;
 

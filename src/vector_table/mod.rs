@@ -9,7 +9,7 @@ pub union Vector {
 
 #[link_section = ".vector_table.reset_vector"]
 #[no_mangle]
-pub static __RESET_VECTOR: unsafe extern "C" fn() -> ! = Reset;
+pub static __RESET_VECTOR: unsafe extern "C" fn() -> ! = RESET;
 
 #[link_section = ".vector_table.exceptions"]
 pub static __EXCEPTIONS: [Vector; 14] = [
@@ -17,10 +17,12 @@ pub static __EXCEPTIONS: [Vector; 14] = [
     //
     // Exception 2: Non Maskable Interrupt.
     Vector {
-        handler: NonMaskableInt,
+        handler: NON_MASKABLE_INT,
     },
     // Exception 3: Hard Fault Interrupt.
-    Vector { handler: HardFault },
+    Vector {
+        handler: HARD_FAULT,
+    },
     // Reserved 4-10
     // Exception 4:
     Vector { reserved: 0 },
@@ -37,15 +39,15 @@ pub static __EXCEPTIONS: [Vector; 14] = [
     // Exception 10
     Vector { reserved: 0 },
     // Exception 11: SV Call Interrupt.
-    Vector { handler: SVCall },
+    Vector { handler: SV_CALL },
     // Exception 12:
     Vector { reserved: 0 },
     // Exception 13:
     Vector { reserved: 0 },
     // Exception 14: Pend SV Interrupt
-    Vector { handler: PendSV },
+    Vector { handler: PEND_SV },
     // Exception 15: System Tick Interrupt.
-    Vector { handler: SysTick },
+    Vector { handler: SYS_TICK },
 ];
 
 #[link_section = ".vector_table.interrupts"]
@@ -134,13 +136,13 @@ fn panic(_info: &core::panic::PanicInfo) -> ! {
 
 extern "C" {
     // RESET HANDLER (RESET_HANDLER.c)
-    fn Reset() -> !;
+    fn RESET() -> !;
     // EXCEPTION HANDLERS (EXCEPTIONS.rs)
-    fn NonMaskableInt();
-    fn HardFault();
-    fn SVCall();
-    fn PendSV();
-    fn SysTick();
+    fn NON_MASKABLE_INT();
+    fn HARD_FAULT();
+    fn SV_CALL();
+    fn PEND_SV();
+    fn SYS_TICK();
     // INTERRUPT HANDLERS (INTERRUPTS.rs)
     fn uart_irq();
     fn TIMER_IRQ_0();

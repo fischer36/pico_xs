@@ -24,9 +24,9 @@ INCLUDE memory.x
 
 /* # Entry point = reset vector */
 EXTERN(__RESET_VECTOR);
-EXTERN(Reset);
+EXTERN(RESET);
 
-ENTRY(Reset);
+ENTRY(RESET);
 
 /* # Exception vectors */
 /* This is effectively weak aliasing at the linker level */
@@ -36,7 +36,7 @@ EXTERN(__EXCEPTIONS); /* depends on all the these PROVIDED symbols */
 
 EXTERN(DefaultHandler);
 
-PROVIDE(TIMER_IRQ_0 = DefaultHandler);
+/* PROVIDE(TIMER_IRQ_0 = DefaultHandler); */
 PROVIDE(TIMER_IRQ_1 = DefaultHandler);
 PROVIDE(TIMER_IRQ_2 = DefaultHandler);
 PROVIDE(TIMER_IRQ_3 = DefaultHandler);
@@ -85,17 +85,20 @@ PROVIDE(SWI_IRQ_5 = DefaultHandler);
 /* EXTERN(RTC_HANDLER); */
  /*EXTERN(SW_HANDLER); */
 
-PROVIDE(NonMaskableInt = DefaultHandler);
+
+EXTERN(HardFaultTrampoline);
+PROVIDE(NON_MASKABLE_INT = DefaultHandler);
+PROVIDE(HARD_FAULT = DefaultHandler);
+PROVIDE(SV_CALL = DefaultHandler);
+PROVIDE(PEND_SV = DefaultHandler);
+PROVIDE(SYS_TICK = DefaultHandler);
+
 EXTERN(HardFaultTrampoline);
 PROVIDE(MemoryManagement = DefaultHandler);
 PROVIDE(BusFault = DefaultHandler);
 PROVIDE(UsageFault = DefaultHandler);
 PROVIDE(SecureFault = DefaultHandler);
-PROVIDE(SVCall = DefaultHandler);
 PROVIDE(DebugMonitor = DefaultHandler);
-PROVIDE(PendSV = DefaultHandler);
-PROVIDE(SysTick = DefaultHandler);
-PROVIDE(HardFault = DefaultHandler);
 
 
 /* # Interrupt vectors */

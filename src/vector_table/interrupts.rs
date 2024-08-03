@@ -1,8 +1,10 @@
+use crate::xs::Bits;
 #[no_mangle]
-unsafe extern "C" fn TIMER_IRQ_0() -> ! {
-    loop {}
+unsafe extern "C" fn TIMER_IRQ_0() {
+    // let armed: *mut u32 = (crate::registers::timer::BASE + 0x34) as *mut u32;
+    // // let timer_intr: *mut u32 = (crate::registers::timer::BASE + 0x34) as *mut u32;
+    // armed.set(1 << 0);
 }
-
 #[no_mangle]
 unsafe extern "C" fn TIMER_IRQ_1() -> ! {
     loop {}
