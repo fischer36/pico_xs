@@ -15,7 +15,7 @@ pub fn init() {
     // Set Start Up Delay
     // PICO_XOSC_STARTUP_DELAY_MULTIPLIER = 64
     // KHZ = 1000
-    STARTUP.set(282);
+    STARTUP.set(302);
 
     // Enable Xosc
     const XOSC_CTRL_DISABLE_BITS: u32 = 0xd1e;

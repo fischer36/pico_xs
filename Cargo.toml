@@ -2,9 +2,8 @@
 name = "pico-xs"
 version = "0.1.0"
 edition = "2021"
-build = "build.rs"
+# build = "build.rs"
 [dependencies]
-pico-sdk = "0.3.1"
 # drivers-xs = { path = "../drivers-xs" }
 
 [build-dependencies]

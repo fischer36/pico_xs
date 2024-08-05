@@ -102,7 +102,7 @@ pub struct Watchdog {
 //         CTRL.clear(1 << 30);
 //         // Disable tick aswell
 //         TICK.clear(1 << 9);
-//     }
+//     }ets the job done much more easily than my attempts at doing this in the config.toml file. It runs the command:
 //     // Resets countdown tick, preventing resets.
 //     pub fn kick(&self) {
 //         const LOAD_MASK: u32 = 0xffffff; // Bits 23:0
@@ -131,13 +131,10 @@ const WATCHDOG_TICK: *mut u32 = (BASE + 0x2c) as *mut u32;
 
 static mut load_value: u32 = 200000;
 
-//
-pub fn start(cyles: u32) {
-    const KHZ: u32 = 1000;
-    const XOSC_KHZ: u32 = 12000;
-    let cycles: u32 = XOSC_KHZ / 10;
+// Cycles is 12 for xosc
+pub fn start(cycles: u32) {
     unsafe {
-        WATCHDOG_TICK.set(cycles | 1 << 9);
+        WATCHDOG_TICK.set(17 | 1 << 9);
     }
 }
 pub fn enable(delay_ms: u32) {
@@ -157,8 +154,8 @@ pub fn enable(delay_ms: u32) {
         // Load value
         kick();
 
-        let time_value = (delay_ms / 2) & 0x00FFFFFF; // TIME is 24 bits wid
-        load_value = delay_ms * 1000 * 2;
+        let time_value = (0b_111111111111) & 0x00FFFFFF; // TIME is 24 bits wid
+                                                         // load_value = delay_ms * 1000 * 2;
 
         // Enable
         CTRL.set(time_value | 1 << 30);
