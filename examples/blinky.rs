@@ -1,3 +1,7 @@
+//! # GPIO Out (LED) Example
+//!
+//! Program blinks LED in a loop.
+
 #![no_std]
 #![no_main]
 

@@ -1,3 +1,7 @@
+//! # Xosc (12MHz) Example
+//!
+//! Program uses the crystal oscillator clock.
+
 #![no_std]
 #![no_main]
 
