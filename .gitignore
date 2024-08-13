@@ -4,3 +4,7 @@ test.md
 scrap/
 docs/
 dump
+memory.x
+scripts/
+examples/clocks.rs
+examples/timer.rs

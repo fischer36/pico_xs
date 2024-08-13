@@ -10,21 +10,22 @@ const COUNT: *mut u32 = (BASE + 0x1c) as *mut u32;
 pub fn init() {
     // Set Freq Range
     const XOSC_CTRL_FREQ_RANGE_VALUE_1_15MHZ: u32 = 0xaa0;
+    let clr_mask: u32 = 0b111111111111;
+    CTRL.clear(clr_mask);
     CTRL.set(XOSC_CTRL_FREQ_RANGE_VALUE_1_15MHZ);
 
     // Set Start Up Delay
     // PICO_XOSC_STARTUP_DELAY_MULTIPLIER = 64
     // KHZ = 1000
-    STARTUP.set(302);
+    //
+    STARTUP.set(0xc4);
 
     // Enable Xosc
     const XOSC_CTRL_DISABLE_BITS: u32 = 0xd1e;
     const XOSC_CTRL_ENABLE_BITS: u32 = 0xfab;
-    CTRL.set(XOSC_CTRL_ENABLE_BITS);
+    CTRL.set(XOSC_CTRL_ENABLE_BITS << 12);
 
     const XOSC_STATUS_STABLE_BITS: u32 = 0x80000000;
-    const XOSC_STATUS_ENABLED_BITS: u32 = 1 << 12;
-    const XOSC_DORMANT_VALUE_DORMANT: u32 = 0x636f6d61;
     // Wait for XOSC to stabilize
     unsafe {
         loop {

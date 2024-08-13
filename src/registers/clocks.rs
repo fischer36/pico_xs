@@ -49,7 +49,6 @@ pub fn ref_clock() {
 const XOSC_CLK_SRC: u32 = 0x2;
 
 pub fn init() {
-    let xosc = xosc::init();
     // Disable SYS_REUS as it's for debugging: clear enable bit (8)
     SYS_REUS_CTRL.clear(1 << 8);
     // setup_ppls(false);
@@ -59,6 +58,12 @@ pub fn init() {
     SYS_CTRL.clear(1 << 0);
     REF_DIV.set(1 << 8);
     PERI_CTRL.set(0x4 << 5 | 1 << 11);
+}
+pub fn clk_ref() {
+    // Set SRC bit (1:0) to XOSC (11)
+    REF_CTRL.set(1 << 0 | 1 << 1);
+    // SET DIV TO 1
+    REF_DIV.set(1 << 8);
 }
 
 // To configure a clock you need:

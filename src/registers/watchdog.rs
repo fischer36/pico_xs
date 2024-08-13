@@ -168,6 +168,104 @@ pub fn kick() {
 }
 pub fn did_reboot() -> bool {
     unsafe {
+        if WATCHDOG_SCRATCH_4.read_volatile() == WATCHDOG_NON_REBOOT_MAGIC {
+            true
+        } else {
+            false
+        }
+    }
+}
+
+pub fn trigger() {
+    unsafe {
+        WATCHDOG_TICK.write_volatile(0);
+    }
+}
+
+pub fn xd_pause() {
+    unsafe {
+        // Enable 30
+        let ctrl: *mut u32 = (0x40058000 + 0x00) as *mut u32; // 0x2C
+        let old: u32 = ctrl.read_volatile();
+
+        ctrl.write_volatile(old & !(1 << 26 | 1 << 25 | 1 << 24) as u32);
+    }
+}
+pub fn xd_load_counter(counter: u32) {
+    unsafe {
+        // COunter = delay_ms * 1000 * 2 -> in micro seconds
+        // Reserved 31:24
+        // Load 23:0
+        let load: *mut u32 = (0x40058000 + 0x04) as *mut u32; // 0x2C
+        let old: u32 = load.read_volatile();
+
+        //load.write_volatile(old | counter as u32);
+
+        let mask: u32 = 0b_1111_1111_1111_1111_1111_1111;
+        load.write_volatile(old | 2000);
+    }
+}
+pub fn xd_resets() {
+    unsafe {
+        // Enable 30
+        let wdsel: *mut u32 = (0x4000c000 + 0x4) as *mut u32; // 0x2C
+        let old: u32 = wdsel.read_volatile();
+        let bits: u32 = 131071; // 16:0
+        let mask = old | bits;
+        wdsel.write_volatile(mask & !(1 << 1 | 1 << 0) as u32);
+    }
+}
+pub fn xd_enable() {
+    unsafe {
+        // Enable 30
+        let ctrl: *mut u32 = (0x40058000 + 0x00) as *mut u32; // 0x2C
+        let old: u32 = ctrl.read_volatile();
+
+        ctrl.write_volatile(old | (1 << 30) | 0xfff as u32);
+    }
+}
+pub fn xd_disable() {
+    unsafe {
+        // Enable 30
+        let ctrl: *mut u32 = (0x40058000 + 0x00) as *mut u32; // 0x2C
+        let old: u32 = ctrl.read_volatile();
+
+        ctrl.write_volatile(old & !(1 << 30) as u32);
+    }
+}
+pub fn xd_tick(cycles: u8) {
+    // Cyckes = 12_000_000 / 1_000_000 as u8
+    //
+    const WATCHDOG_TICK_ENABLE_BITS: u32 = 0x200;
+
+    // Reserved 31:20
+    // Count 19:11
+    // Running 10
+    // Enable 9
+    // Cycles 8:0
+    unsafe {
+        const WATCHDOG_TICK_ENABLE_BITS: u32 = 1 << 9;
+        let tick: *mut u32 = (0x40058000 + 0x2c) as *mut u32; // 0x2C
+        let old: u32 = tick.read_volatile();
+
+        tick.write_volatile(old | WATCHDOG_TICK_ENABLE_BITS | 12);
+    }
+    //self.watchdog
+    //    .tick()
+    //    .write(|w| unsafe { w.bits(WATCHDOG_TICK_ENABLE_BITS | cycles as u32) })
+}
+pub fn xs_is_running() -> bool {
+    unsafe {
+        let tick: *mut u32 = (0x40058000 + 0x2c) as *mut u32; // 0x2C
+        if tick.read_volatile() & (1 << 10) != 0 {
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+pub fn xs_did_reboot() -> bool {
+    unsafe {
         if REASON.read_volatile() & (1 << 0 | 1 << 1) != 0
             && WATCHDOG_SCRATCH_4.read_volatile() == WATCHDOG_NON_REBOOT_MAGIC
         {
@@ -177,9 +275,10 @@ pub fn did_reboot() -> bool {
         }
     }
 }
-
-pub fn trigger() {
-    unsafe {
-        WATCHDOG_TICK.write_volatile(0);
-    }
+pub fn xd_init() {
+    //xd_disable();
+    xd_pause();
+    xd_resets();
+    xd_load_counter(2000);
+    xd_enable();
 }
