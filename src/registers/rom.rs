@@ -4,9 +4,24 @@ const ROM_TABLE_LOOKUP: u16 = 0x00000018;
 const ROM_DATA_TABLE: u16 = 0x00000016; // Replace with the actual value
 const ROM_FUNC_TABLE: u16 = 0x00000014;
 
-// Used to generate the lookup code for functions
-fn gen_code(c1: char, c2: char) -> u32 {
-    ((c2 as u32) << 8) | (c1 as u32)
+// Function to retrieve function pointer from code in the ROM fn table
+pub fn get_fn(c1: char, c2: char) -> *mut u32 {
+    unsafe {
+        let p_rom_table_lookup = ROM_TABLE_LOOKUP as *const usize;
+        let func_addr = core::ptr::read_volatile(p_rom_table_lookup);
+
+        // Step 2: Cast the address to a function pointer
+        let rom_table_lookup: RomTableLookupFn = core::mem::transmute(func_addr);
+
+        // Step 3: Obtain pointers to the data and function tables
+        let data_table: *mut u16 = rom_hword_as_ptr(ROM_DATA_TABLE as usize);
+        let func_table: *mut u16 = rom_hword_as_ptr(ROM_FUNC_TABLE as usize);
+
+        // Step 4: Generate code for given characters that identifies the function
+        let code = ((c2 as u32) << 8) | (c1 as u32);
+        // Step 5: Return the function ptr for given code
+        return rom_table_lookup(func_table, code);
+    }
 }
 
 // Function to convert a 16-bit address to a pointer
@@ -74,5 +89,6 @@ type FlashEnterCmdXipFn = unsafe extern "C" fn();
 
 // Misc
 // Lookup Code: 'U', 'B'
-type ResetToUsbBootFn =
+pub type ResetToUsbBootFn =
     unsafe extern "C" fn(gpio_activity_mask: u32, disable_interface_mask: u32) -> u32;
+// End of file
