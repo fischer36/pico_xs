@@ -1,7 +1,7 @@
 // Within ROM read-only memory there are a number of functions that are pre-written to every Pico board by default.
 // Offsets for the ROM table
 const ROM_TABLE_LOOKUP: u16 = 0x00000018;
-const ROM_DATA_TABLE: u16 = 0x00000016; // Replace with the actual value
+const ROM_DATA_TABLE: u16 = 0x00000016;
 const ROM_FUNC_TABLE: u16 = 0x00000014;
 
 // Function to retrieve function pointer from code in the ROM fn table
