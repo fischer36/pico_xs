@@ -36,7 +36,7 @@ pub fn gpio_out_set(gpio: u32) {
     GPIO_OUT_SET.set(1 << gpio);
 }
 pub fn gpio_out_clr(gpio: u32) {
-    GPIO_OUT_CLR.clear(1 << gpio);
+    GPIO_OUT_CLR.set(1 << gpio);
 }
 pub fn gpio_out_xor(gpio: u32) {
     GPIO_OUT_XOR.xor(1 << gpio);
@@ -74,7 +74,7 @@ impl OutputSet {
         self.xor.xor(1 << self.gpio);
     }
 }
-// Temp function
+
 pub fn gpio_input_value() -> u32 {
     // GPIO_IN Register 29:0 where each bit represents the input value of the corresponding GPIO pin
     //

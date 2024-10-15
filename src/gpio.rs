@@ -37,6 +37,11 @@ impl Gpio {
     /// Panics if the provided pin number is out of range.
     pub fn new(gpio: u32) -> Self {
         assert!(gpio < 30);
+
+        // Reset clear output- enable and clear for new instance.
+        sio::gpio_oe_clr(gpio);
+        sio::gpio_out_clr(gpio);
+
         Self {
             pin: gpio,
             status: (io_bank::BASE + 0x8 * gpio) as *mut u32,
@@ -49,6 +54,7 @@ impl Gpio {
 
     /// Configures the function selection for the GPIO pin.
     ///
+    ///
     /// # Arguments
     /// * `funcsel` - The function selection code, which configures the pin's mode (e.g., as input, output, alt function).
     ///
@@ -58,5 +64,34 @@ impl Gpio {
         const FUNCSEL_MASK: u32 = 0b11111;
         //assert!(funcsel > 0 && funcsel < 10);
         self.ctrl.modify(FUNCSEL_MASK, funcsel);
+    }
+
+    /// Toggles output enable - OE for the specified pin.
+    ///
+    /// # Arguments
+    ///
+    /// * `toggle` - `true` to enable output, -`false` to disable output.
+    pub fn output_enable(&self, toggle: bool) {
+        if toggle {
+            sio::gpio_oe_set(self.pin);
+        } else {
+            sio::gpio_oe_clr(self.pin);
+        }
+    }
+
+    pub fn output_set(&self, toggle: bool) {
+        if toggle {
+            sio::gpio_out_set(self.pin);
+        } else {
+            sio::gpio_out_clr(self.pin);
+        }
+    }
+
+    pub fn input_high(&self) -> bool {
+        return sio::gpio_input_value() & (1 << self.pin) != 0;
+    }
+
+    pub fn set_pull(&self, pull: pads_bank::Pull) {
+        pads_bank::gpio_pull(self.pin, pull);
     }
 }

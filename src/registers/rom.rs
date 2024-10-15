@@ -4,7 +4,7 @@ const ROM_FUNC_TABLE: u16 = 0x00000014;
 const ROM_TABLE_LOOKUP: u16 = 0x00000018;
 
 // Function to retrieve function pointer from code in the ROM fn table
-type RomTableLookupFn = unsafe extern "C" fn(table: *const u16, code: u32) -> *const ();
+type RomTableLookupFn = unsafe extern "C" fn(table: *const u16, code: u32) -> *mut u32;
 
 /// Retrieves a function pointer from the ROM function table based on a two-character code.
 ///
@@ -93,7 +93,8 @@ pub type FlashExitXipFn = unsafe extern "C" fn();
 
 /// Erases a range of flash memory.
 /// Lookup Code: 'R', 'E'
-pub type FlashRangeEraseFn = unsafe extern "C" fn(addr: u32, count: usize, block_size: u32, block_cmd: u8);
+pub type FlashRangeEraseFn =
+    unsafe extern "C" fn(addr: u32, count: usize, block_size: u32, block_cmd: u8);
 
 /// Programs data to a range of flash addresses.
 /// Lookup Code: 'R', 'P'
@@ -109,4 +110,5 @@ pub type FlashEnterCmdXipFn = unsafe extern "C" fn();
 
 /// Resets to USB boot.
 /// Lookup Code: 'U', 'B'
-pub type ResetToUsbBootFn = unsafe extern "C" fn(gpio_activity_mask: u32, disable_interface_mask: u32) -> u32;
+pub type ResetToUsbBootFn =
+    unsafe extern "C" fn(gpio_activity_mask: u32, disable_interface_mask: u32) -> u32;

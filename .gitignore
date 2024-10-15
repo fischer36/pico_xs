@@ -8,3 +8,4 @@ memory.x
 scripts/
 examples/clocks.rs
 examples/timer.rs
+.dev-log/

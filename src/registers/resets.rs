@@ -69,12 +69,22 @@ pub fn reset_wait(mask: u32) {
         }
     }
 }
-pub fn reset_start(mask: u32) {
-    // Set bits in RESETS_RESET to start reset
-    RESETS_RESET.modify(RESET_MASK, mask);
-}
 
-pub fn reset_stop(mask: u32) {
-    // Set bits in RESETS_RESET to stop reset
-    RESETS_RESET.clear(mask);
-}
+//// FIXME: Seemingly unfunctional
+//pub fn reset_start(mask: u32) {
+//    // Set bits in RESETS_RESET to start reset
+//    RESETS_RESET.set(mask);
+//}
+//
+//// FIXME: Seemingly unfunctional
+//pub fn reset_stop(mask: u32) {
+//    // Set bits in RESETS_RESET to stop reset
+//    RESETS_CLR.set(mask);
+//}
+//
+//// FIXME: Seemingly unfunctional
+//pub fn reset_done(mask: u32) -> bool {
+//    unsafe {
+//        return (mask & RESETS_DONE.read()) == 0;
+//    }
+//}

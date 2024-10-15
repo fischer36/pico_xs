@@ -10,17 +10,22 @@ use hal::{gpio, registers, xs};
 
 #[no_mangle]
 pub extern "C" fn main() -> ! {
+    // Reset IO_BANK0 (bit 5)
     registers::resets::reset_wait(1 << 5);
-    let mut gpio = gpio::Gpio::new(25);
-    gpio.oe.clr();
-    gpio.out.clr();
+
+    // Initialize GPIO pin 25 (LED)
+    let gpio = gpio::Gpio::new(25);
+
+    // Select funcsel
     gpio.select_funcsel(5);
-    gpio.oe.set();
-    gpio.out.set();
+
+    // Enable output
+    gpio.output_enable(true);
     loop {
+        // Toggle output - LED on and off
+        gpio.output_set(true);
         xs::sleep();
-        gpio.out.clr();
+        gpio.output_set(false);
         xs::sleep();
-        gpio.out.set();
     }
 }
