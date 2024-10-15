@@ -21,15 +21,14 @@
 //! Include `pico_xs` in your Cargo.toml and refer to the example code for initial setup and
 //! usage.
 //!
-/// Hardware register modules, providing low-level access to system registers.
-pub mod registers;
-/// Interrupt vector handling for the RP2040.
-pub mod vector_table;
-
 /// GPIO module for general-purpose input/output functionalities.
 pub mod gpio;
+/// Hardware register modules, providing low-level access to system registers.
+pub mod registers;
 /// USB module.
 pub mod usb_xs;
+/// Interrupt vector handling for the RP2040.
+pub mod vector_table;
 /// Extended support and utility functions.
 pub mod xs;
 

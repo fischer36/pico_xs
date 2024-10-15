@@ -1,6 +1,6 @@
 mod exceptions;
 mod interrupts;
-
+mod reset_handler;
 // Vector Entry Union
 pub union Vector {
     handler: unsafe extern "C" fn(),
