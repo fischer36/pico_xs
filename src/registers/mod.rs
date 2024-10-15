@@ -5,9 +5,6 @@ pub mod ppb_base;
 pub mod resets;
 pub mod rom;
 pub mod sio;
-pub mod timer;
-pub mod uart;
-pub mod usb_ctrl;
 pub mod watchdog;
 pub mod xosc;
 

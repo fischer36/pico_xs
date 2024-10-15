@@ -10,3 +10,9 @@ examples/clocks.rs
 examples/timer.rs
 .dev-log/
 src/ffi
+script.sh
+src/usb_xs.rs
+src/registers/usb_ctrl.rs
+src/registers/timer.rs
+src/registers/uart.rs
+src/registers/socs.rs

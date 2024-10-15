@@ -24,9 +24,7 @@ pub extern "C" fn main() -> ! {
     gpio.out.set();
     loop {
         xs::sleep();
-        xs::sleep();
         gpio.out.clr();
-        xs::sleep();
         xs::sleep();
         gpio.out.set();
     }
