@@ -16,3 +16,7 @@ Step 3 - Build and run an example (with Pico in USB Bootloader mode)
 ```bash
 cargo run --example blinky
 ```
+## License
+The contents of this repository (excluding *boot2.bin*) are licensed under the Apache License 2.0. See the LICENSE file for details.
+
+The boot2.bin file is licensed under the BSD-3-Clause License. See the LICENSE-BSD3 file for details.
