@@ -1,4 +1,11 @@
-/// THe Xosc is disabled by default.
+/// XOSC - Crystal Oscillator Control for RP2040.
+///
+/// The XOSC is disabled by default and needs to be configured before use.
+/// This module provides functionality to configure, enable, and check the status of the XOSC.
+///
+/// The XOSC configuration involves setting the frequency range, startup delay, and enabling the oscillator.
+/// It also provides a method to check if the XOSC is enabled.
+use crate::xs::Bits;
 
 const BASE: u32 = 0x40024000;
 const CTRL: *mut u32 = (BASE + 0x00) as *mut u32;
@@ -7,17 +14,22 @@ const DOORMANT: *mut u32 = (BASE + 0x08) as *mut u32;
 const STARTUP: *mut u32 = (BASE + 0x0c) as *mut u32;
 const COUNT: *mut u32 = (BASE + 0x1c) as *mut u32;
 
+/// Initializes the XOSC.
+///
+/// This function sets the frequency range, startup delay, and enables the XOSC. It will wait until the XOSC
+/// becomes stable before returning.
+///
+/// # Example
+/// ```
+/// registers::xosc::init();
+/// ```
 pub fn init() {
+    // Configures XOSC with default values.
+
     // Set Freq Range
-    const XOSC_CTRL_FREQ_RANGE_VALUE_1_15MHZ: u32 = 0xaa0;
-    let clr_mask: u32 = 0b111111111111;
-    CTRL.clear(clr_mask);
-    CTRL.set(XOSC_CTRL_FREQ_RANGE_VALUE_1_15MHZ);
+    CTRL.modify(0xFFF, 0xaa0);
 
     // Set Start Up Delay
-    // PICO_XOSC_STARTUP_DELAY_MULTIPLIER = 64
-    // KHZ = 1000
-    //
     STARTUP.set(0xc4);
 
     // Enable Xosc
@@ -26,6 +38,7 @@ pub fn init() {
     CTRL.set(XOSC_CTRL_ENABLE_BITS << 12);
 
     const XOSC_STATUS_STABLE_BITS: u32 = 0x80000000;
+
     // Wait for XOSC to stabilize
     unsafe {
         loop {
@@ -35,68 +48,24 @@ pub fn init() {
         }
     }
 }
-use crate::xs::Bits;
-#[repr(C)]
-pub struct Xosc {
-    pub ctrl: *mut u32, // 0x00
-    //   11:0 freq_range
-    //   23:12 enable
-    pub status: *mut u32, // 0x04
-    //   12 enabled
-    //   24 badwrite
-    //   31 stable
-    pub doormant: *mut u32, // 0x8
-    //   31:0
-    pub startup: *mut u32, // 0x0c
-    //   13:0 delay
-    //   20 x4
-    pub count: *mut u32, // 0x1c
-                         //   7:0
-}
 
-impl Xosc {
-    pub fn new() -> Self {
-        Self {
-            ctrl: BASE as *mut u32,
-            status: (BASE + 0x04) as *mut u32,
-            doormant: (BASE + 0x08) as *mut u32,
-            startup: (BASE + 0x0c) as *mut u32,
-            count: (BASE + 0x1c) as *mut u32,
-        }
-    }
-    pub fn ctrl_enable(&self) {
-        self.ctrl.clear(0b_1111_1111_1111 << 12);
-        self.ctrl.set(0xfab << 12);
-        loop {
-            unsafe {
-                let value = self.status.read_volatile();
-                if (value & (1 << 31)) != 0 {
-                    break;
-                }
-            }
-        }
-    }
-
-    pub fn ctrl_disable(&self) {
-        self.ctrl.clear(0b_1111_1111_1111 << 12);
-        self.ctrl.set(0xd1e << 12);
-    }
-    pub fn ctrl_freq_range(&self) {
-        // 1_15mhz
-        self.ctrl.set(0xaa0);
-    }
-    pub fn startup_delay(&self) {
-        self.startup.set(0xc4);
-    }
-    fn wait_for_stable() {
-        const XOSC_STATUS_STABLE_BITS: u32 = 0x80000000;
-        const XOSC_DORMANT_VALUE_DORMANT: u32 = 0x636f6d61;
-        loop {
-            unsafe {
-                if STATUS.read_volatile() & XOSC_STATUS_STABLE_BITS != 0 {
-                    break;
-                }
-            }
+/// Checks if the XOSC is enabled.
+///
+/// This function returns `true` if the XOSC is currently enabled, `false` otherwise.
+///
+/// # Example
+/// ```
+/// if registers::xosc::is_enabled() {
+///     // XOSC is enabled
+/// }
+/// ```
+pub fn is_enabled() -> bool {
+    unsafe {
+        const XOSC_CTRL_ENABLE_BITS: u32 = 0xfab;
+        if (STATUS.read_volatile() & (1 << 12)) != 0 {
+            true
+        } else {
+            false
         }
     }
 }

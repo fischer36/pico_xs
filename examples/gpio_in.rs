@@ -1,6 +1,6 @@
 //! # GPIO Input (Button) Example
 //!
-//! Program blinks LED when GPIO 15 is low - button press causing GROUND.
+//! This program blinks an LED when GPIO pin 15 (connected to a button) is low (button press).
 
 #![no_std]
 #![no_main]
@@ -15,16 +15,16 @@ pub extern "C" fn main() -> ! {
 
     // Initialize GPIO pin 25 (LED)
     let gpio_led = gpio::Gpio::new(25);
-    // Select funcsel
+    // Set function select to SIO
     gpio_led.select_funcsel(5);
-    // Enable output
+    // Enable output for the LED
     gpio_led.output_enable(true);
 
     // Initialize GPIO pin 15 (Button)
     let gpio_button = gpio::Gpio::new(15);
-    // Select funcsel
+    // Set function select to SIO
     gpio_button.select_funcsel(5);
-    // Set pull up resistor for button GPIO
+    // Enable pull-up resistor for the button input (active low)
     gpio_button.set_pull(registers::pads_bank::Pull::Up);
 
     loop {

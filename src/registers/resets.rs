@@ -1,6 +1,5 @@
 use crate::xs::Bits;
-const BASE: u32 = 0x4000C000;
-
+const BASE: u32 = 0x4000c000;
 const RESETS_RESET: *mut u32 = (BASE + 0x0) as *mut u32;
 const RESETS_DONE: *mut u32 = (BASE + 0x8) as *mut u32;
 const RESETS_CLR: *mut u32 = (BASE + 0x3000) as *mut u32;
@@ -71,11 +70,11 @@ pub fn reset_wait(mask: u32) {
 }
 
 //// FIXME: Seemingly unfunctional
-//pub fn reset_start(mask: u32) {
-//    // Set bits in RESETS_RESET to start reset
-//    RESETS_RESET.set(mask);
-//}
-//
+pub fn reset_start(bit: u32) {
+    // Set bits in RESETS_RESET to start reset
+    RESETS_RESET.set(1 << bit);
+}
+
 //// FIXME: Seemingly unfunctional
 //pub fn reset_stop(mask: u32) {
 //    // Set bits in RESETS_RESET to stop reset

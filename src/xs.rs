@@ -69,7 +69,7 @@ impl Bits<u32> for *mut u32 {
     }
     fn modify(&self, mask: u32, bits: u32) {
         unsafe {
-            write_volatile(*self, (read_volatile(*self) & !mask) | (mask & bits));
+            write_volatile(*self, (read_volatile(*self) & !mask) | bits);
         }
     }
     fn xor(&self, bits: u32) {
@@ -90,6 +90,13 @@ pub fn sleep() {
     }
 }
 
+pub fn sleep_small() {
+    unsafe {
+        for _ in 0..10_000 {
+            core::arch::asm!("nop");
+        }
+    }
+}
 pub fn nop() {
     unsafe {
         core::arch::asm!("nop");

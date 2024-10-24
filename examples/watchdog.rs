@@ -1,43 +1,50 @@
 //! # Watchdog Example
 //!
-//! Program initializes watchdog and then blinks LED in a loop. If wathdog doesn't get kicked
-//! (xd_load_counter) it triggers a watchdog reset.
+//! This program demonstrates the functionality of the watchdog timer. The program initializes the
+//! watchdog and turns on the LED. As long as the watchdog is kicked (refreshed) in the main loop,
+//! the LED will remain on. If the watchdog kick line is commented out, the system will reset,
+//! turning the LED off and on repeatedly, illustrating how the watchdog works.
 
 #![no_std]
 #![no_main]
 
 extern crate pico_xs as hal;
-use hal::{
-    gpio,
-    registers::{self, watchdog},
-    xs,
-};
-use xs::Bits;
+use hal::{gpio, registers, xs};
 
 #[no_mangle]
 pub extern "C" fn main() -> ! {
-    xs::sleep();
-    xs::sleep();
+    // Reset IO_BANK0 (bit 5) for GPIO operations
     registers::resets::reset_wait(1 << 5);
-    let mut gpio = gpio::Gpio::new(25);
-    registers::watchdog::xd_init();
+
+    // Create Watchdog instance
+    let watchdog = registers::watchdog::Watchdog::new(1_200_000);
+
+    // Initialize XOSC (external oscillator)
     registers::xosc::init();
-    registers::watchdog::xd_tick(12);
 
-    while !registers::watchdog::xs_is_running() {
-        xs::sleep();
-    }
+    // Start Watchdog tick timer
+    watchdog.tick();
 
-    registers::watchdog::xd_load_counter(2000);
-    gpio.oe.clr();
-    gpio.out.clr();
-    gpio.select_funcsel(5);
+    // Initialize GPIO pin 25 (LED)
+    let led_gpio = gpio::Gpio::new(25);
 
-    registers::watchdog::xd_load_counter(1000);
-    gpio.oe.set();
-    gpio.out.set();
+    // Configure GPIO pin 25 as output for the LED
+    led_gpio.select_funcsel(5); // SIO funcsel
+    led_gpio.output_enable(true); // Enable output
 
+    // Turn on the LED - it stays on as long as the system doesn't reset
+    led_gpio.output_set(true);
+
+    // Start the watchdog timer
+    watchdog.start();
+
+    // Main loop: kick the watchdog and keep the LED on
     loop {
-        registers::watchdog::xd_load_counter(1000);
+        // Kick (refresh) the watchdog timer to prevent a system reset.
+        // If this line is commented out, the watchdog will trigger a reset after the timeout.
+        watchdog.kick();
+
+        // Sleep to simulate normal operation between kicks
+        xs::sleep_small();
     }
 }

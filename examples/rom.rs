@@ -1,6 +1,6 @@
 //! # ROM function usage (reset_to_usb_boot) Example
 //!
-//! Program immediatel resets back into USB bootloader mode from software.
+//! This program demonstrates how to reset the device into USB bootloader mode directly from software.
 
 #![no_std]
 #![no_main]

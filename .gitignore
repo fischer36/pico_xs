@@ -16,3 +16,5 @@ src/registers/usb_ctrl.rs
 src/registers/timer.rs
 src/registers/uart.rs
 src/registers/socs.rs
+examples/ST7735s_SPI.rs
+src/registers/spi.rs
