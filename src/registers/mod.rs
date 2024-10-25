@@ -5,7 +5,7 @@ pub mod ppb_base;
 pub mod resets;
 pub mod rom;
 pub mod sio;
-pub mod spi;
+//pub mod spi;
 pub mod watchdog;
 pub mod xosc;
 
