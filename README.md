@@ -18,7 +18,7 @@ cargo run --example blinky
 ```
 ## 🗺️ Roadmap
 - [ ] Develop Custom Stage 2 Bootloader Firmware.
-- [ ] Publish Crates.io.
+- [ ] Publish on Crates.io.
 ## 📜 License
 The contents of this repository (excluding *boot2.bin*) are licensed under the Apache License 2.0. See the LICENSE file for details.
 
