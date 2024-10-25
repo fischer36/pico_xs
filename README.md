@@ -16,6 +16,9 @@ Step 3 - Build and run an example (with Pico in USB Bootloader mode)
 ```bash
 cargo run --example blinky
 ```
+## 🗺️ Roadmap
+- [ ] Develop Custom Stage 2 Bootloader Firmware.
+- [ ] Publish Crates.io.
 ## 📜 License
 The contents of this repository (excluding *boot2.bin*) are licensed under the Apache License 2.0. See the LICENSE file for details.
 
