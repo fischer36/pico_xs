@@ -3,11 +3,16 @@
 
 
 Pico XS is an independent, bare-metal, all-in-one SDK for embedded Rust development on the ARM Cortex-M0+ Raspberry Pi Pico microcontroller. This project offers minimal, low-level access to the hardware features of the microcontroller, providing developers with precise control and the ability to work directly with the hardware.
+
 ## Table of Contents
-1. [🛠️ Getting Started](#️-getting-started)
-2. [📝 Documentation](#-documentation)
-3. [🗺️ Roadmap](#️-roadmap)
-4. [📜 License](#-license)
+- [🚧 Disclaimer](#disclaimer)
+- [🛠️ Getting Started](#getting-started)
+- [📝 Documentation](#documentation)
+- [🗺️ Roadmap](#roadmap)
+- [📜 License](#license)
+
+## 🚧 Disclaimer 
+This project is **in development**, which means it is not ready for library use *yet*. However, you can clone the repository and build it yourself.
 
 ## 🛠️ Getting Started
 
@@ -53,14 +58,15 @@ cargo run --example blinky
 
 ### Compilation Process
 Pico XS is exclusively designed for embedded development on the Raspberry Pi Pico microcontroller, requiring a strict compilation process in accordance with the microcontroller's specifications. Pico XS provides all the necessary compilation steps by default, requiring only the user to set the appropriate target. Here's an overview of the compilation steps:
-1. Linker Script - The provided linker script [link.ld](./link.ld) is required to match the Pico's memory layout and provide essential boilerplate specifics to the RP2040 chip.
-2. Target Configuration - The Raspberry Pi Pico uses the thumbv6m-none-eabi architecture. The Rust target needs to be set appropriately: ``rustup target add thumbv6m-none-eabi``
-3. Compiling the Project - Compile the project using Cargo with the specified target: ``cargo build --release --target thumbv6m-none-eabi``
-4. Convert and Flash - Use elf2uf2-rs to convert the ELF binary to UF2 format and then simply move the resulting UF2 file to to the Pico (The Pico needs to be USB Bootloader Mode)
+- **Linker Script** - The provided linker script [link.ld](./link.ld) is required to match the Pico's memory layout and provide essential boilerplate specifics to the RP2040 chip.
+- **Target Configuration** - The Raspberry Pi Pico uses the thumbv6m-none-eabi architecture. The Rust target needs to be set appropriately: ``rustup target add thumbv6m-none-eabi``
+- **Compiling the Project** - Compile the project using Cargo with the specified target: ``cargo build --release --target thumbv6m-none-eabi``
+- **Convert and Flash** - Use elf2uf2-rs to convert the ELF binary to UF2 format and then simply move the resulting UF2 file to to the Pico (The Pico needs to be USB Bootloader Mode)
 ## 🗺️ Roadmap
 - [x] Crates.io Release
 - [ ] Develop Custom Stage 2 Bootloader Firmware
 - [ ] Sample Project
+- [ ] Remove library build configuration
 
 ## 📜 License
 The contents of this repository (excluding *boot3.bin*) are licensed under the [Apache License 2.0](LICENSE). See the `LICENSE` file for details. The `boot3.bin` file is licensed under the [BSD-3-Clause License](LICENSE-BSD3). See the `LICENSE-BSD3` file for details.
