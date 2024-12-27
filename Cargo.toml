@@ -1,6 +1,6 @@
 [package]
 name = "pico-xs"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["fischer36"]
 description = "A Rust Embedded-SDK for bare-metal development on the RP2040 Raspberry Pi Pico microcontroller."
 repository = "https://github.com/fischer36/pico-xs"
