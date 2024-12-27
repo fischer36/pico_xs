@@ -4,14 +4,10 @@
 Pico XS is an independent, bare-metal, all-in-one SDK for embedded Rust development on the ARM Cortex-M0+ Raspberry Pi Pico microcontroller. This project offers minimal, low-level access to the hardware features of the microcontroller, providing developers with precise control and the ability to work directly with the hardware.
 
 ## Table of Contents
-- [🚧 Disclaimer](#disclaimer)
 - [🛠️ Getting Started](#getting-started)
 - [📝 Documentation](#documentation)
 - [🗺️ Roadmap](#roadmap)
 - [📜 License](#license)
-
-## 🚧 Disclaimer
-This project is **in development**, which means it is not ready for library use *yet*. However, you can clone the repository and build it yourself.
 
 ## 🛠️ Getting Started
 
