@@ -59,7 +59,7 @@ Pico XS is exclusively designed for embedded development on the Raspberry Pi Pic
 4. Convert and Flash - Use elf2uf2-rs to convert the ELF binary to UF2 format and then simply move the resulting UF2 file to to the Pico (The Pico needs to be USB Bootloader Mode)
 ## 🗺️ Roadmap
 - [x] Crates.io Release
-- [ ] Develop Custom Stage 2 Bootloader Firmware.
+- [ ] Develop Custom Stage 2 Bootloader Firmware
 - [ ] Sample Project
 
 ## 📜 License
