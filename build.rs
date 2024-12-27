@@ -5,10 +5,17 @@ use std::path::PathBuf;
 
 fn main() {
     //cc::Build::new()
+    // eI
     //    .include("src/include")
     //    .file("src/vector_table/reset_handler.c")
     //    .compile("ffi");
+    let out21 = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").unwrap());
 
+    File::create("./helloxd.txt")
+        .unwrap()
+        .write_all(b"XD")
+        .unwrap();
+    println!("HAHHAH XD {:?}", out21);
     let out = PathBuf::from(env::var_os("OUT_DIR").unwrap());
     // Include `link.ld` at compile time, create it in the output directory, and write contents
     // Put `boot2.bin` in our output directory and ensure it's on the linker search path.
