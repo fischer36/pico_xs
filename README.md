@@ -1,5 +1,6 @@
 # Pico XS 
-![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)![https://crates.io/crates/pico-xs](https://img.shields.io/crates/v/pico_xs.svg)
+![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg) [![Crates.io](https://img.shields.io/crates/v/pico_xs.svg)](https://crates.io/crates/pico_xs)
+
 
 Pico XS is an independent, bare-metal, all-in-one SDK for embedded Rust development on the ARM Cortex-M0+ Raspberry Pi Pico microcontroller. This project offers minimal, low-level access to the hardware features of the microcontroller, providing developers with precise control and the ability to work directly with the hardware.
 ## Table of Contents
