@@ -17,15 +17,11 @@ fn main() {
         .unwrap();
     println!("HAHHAH XD {:?}", out21);
     let out = PathBuf::from(env::var_os("OUT_DIR").unwrap());
-    // Include `link.ld` at compile time, create it in the output directory, and write contents
-    // Put `boot2.bin` in our output directory and ensure it's on the linker search path.
     File::create(out.join("boot2.bin"))
         .unwrap()
         .write_all(include_bytes!("boot2.bin"))
         .unwrap();
 
-    // println!("cargo:rustc-link-lib=static=ffi");
-    // println!("cargo:rustc-Cllvm-args=--inline-threshold=5"); // Set inline threshold
     let link = include_bytes!("link.ld");
     let mut link_file = File::create(out.join("link.ld")).unwrap();
     link_file.write_all(link).unwrap();
