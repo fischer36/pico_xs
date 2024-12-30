@@ -11,4 +11,11 @@ fn main() {
     println!("cargo:rustc-link-arg=-Tlink.ld");
     println!("cargo:rustc-link-arg=--nmagic");
     println!("cargo:rerun-if-changed=build.rs");
+
+    cc::Build::new()
+        .include("src/include")
+        .file("src/xd.c")
+        .compile("ffi");
+
+    println!("cargo:rustc-link-lib=static=ffi");
 }

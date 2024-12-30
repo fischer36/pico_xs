@@ -2,13 +2,13 @@
 use crate::xs::Bits;
 const BASE: u32 = 0xe0000000;
 // Interrupt set enable
-pub const NVIC_ISER: *mut u32 = (BASE + 0x100) as *mut u32;
+pub const NVIC_ISER: *mut u32 = (BASE + 0xE100) as *mut u32;
 // Interrupt clear enable
-pub const NVIC_ICER: *mut u32 = (BASE + 0x180) as *mut u32;
+pub const NVIC_ICER: *mut u32 = (BASE + 0xE180) as *mut u32;
 // Interrupt set pending
-pub const NVIC_ISPR: *mut u32 = (BASE + 0x200) as *mut u32;
+pub const NVIC_ISPR: *mut u32 = (BASE + 0xE200) as *mut u32;
 // Interrupt clear pending
-pub const NVIC_ICPR: *mut u32 = (BASE + 0x280) as *mut u32;
+pub const NVIC_ICPR: *mut u32 = (BASE + 0xE280) as *mut u32;
 
 pub enum Interrupt {
     TIMER_IRQ_0 = 0,
@@ -38,6 +38,18 @@ pub enum Interrupt {
     I2C1_IRQ = 24,
     RTC_IRQ = 25,
 }
+
 pub fn enable_interrupt(interrupt: Interrupt) {
-    NVIC_ISER.set(1 << 0);
+    NVIC_ISER.set(1 << 0 as u32);
+}
+
+pub fn disable_interrupt(interrupt: Interrupt) {
+    NVIC_ISER.clear(1 << 0 as u32);
+}
+
+pub fn set_pending(interrupt: Interrupt) {
+    NVIC_ICPR.clear(1 << interrupt as u32);
+}
+pub fn clear_pending(interrupt: Interrupt) {
+    NVIC_ICPR.set(1 << interrupt as u32);
 }

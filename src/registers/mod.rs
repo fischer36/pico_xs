@@ -4,8 +4,7 @@ pub mod ppb_base;
 pub mod resets;
 pub mod rom;
 pub mod sio;
-//pub mod spi;
-//pub mod clocks;
+pub mod timer;
 pub mod watchdog;
 pub mod xosc;
 

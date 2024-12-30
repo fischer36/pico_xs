@@ -8,13 +8,11 @@ dump
 memory.x
 scripts/
 examples/clocks.rs
-examples/timer.rs
 .dev-log/
 src/ffi
 script.sh
 src/usb_xs.rs
 src/registers/usb_ctrl.rs
-src/registers/timer.rs
 src/registers/uart.rs
 src/registers/socs.rs
 examples/ST7735s_SPI.rs
@@ -22,5 +20,4 @@ src/registers/spi.rs
 shit/
 src/usb_xs.rs
 src/registers/clocks.rs
-src/registers/timer.rs
 examples/interrupt_handler.rs

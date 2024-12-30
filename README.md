@@ -68,9 +68,8 @@ cargo build --release --target thumbv6m-none-eabi
 
 ## 🗺️ Roadmap
 - [x] Crates.io Release
+- [x] Sample Project
 - [ ] Develop Custom Stage 2 Bootloader Firmware
-- [ ] Sample Project
-- [ ] Remove library build configuration
 
 ## 📜 License
 The contents of this repository (excluding *boot2.bin*) are licensed under the [Apache License 2.0](LICENSE). See the `LICENSE` file for details. The `boot2.bin` file is licensed under the [BSD-3-Clause License](LICENSE-BSD3). See the `LICENSE-BSD3` file for details.
