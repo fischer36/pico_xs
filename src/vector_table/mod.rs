@@ -1,10 +1,59 @@
-mod exceptions;
-mod interrupts;
-mod reset_handler;
+mod handlers;
+
 // Vector Entry Union
 pub union Vector {
     handler: unsafe extern "C" fn(),
     reserved: u32,
+}
+
+// Declare Handlers;
+extern "C" {
+    // RESET HANDLER (Entry Point) is set to RESET found in handlers.rs
+    fn RESET() -> !;
+
+    // All handlers below are by default set to DEFAULT_HANDLER in handlers.rs using provide in
+    // link.ld; they can be overridden.
+
+    // EXCEPTION HANDLERS
+    fn NON_MASKABLE_INT();
+    fn HARDFAULT();
+    fn SV_CALL();
+    fn PEND_SV();
+    fn SYS_TICK();
+
+    // INTERRUPT HANDLERS
+    fn TIMER_IRQ_0();
+    fn TIMER_IRQ_1();
+    fn TIMER_IRQ_2();
+    fn TIMER_IRQ_3();
+    fn PWM_IRQ_WRAP();
+    fn USBCTRL_IRQ();
+    fn XIP_IRQ();
+    fn PIO0_IRQ_0();
+    fn PIO0_IRQ_1();
+    fn PIO1_IRQ_0();
+    fn PIO1_IRQ_1();
+    fn DMA_IRQ_0();
+    fn DMA_IRQ_1();
+    fn IO_IRQ_BANK0();
+    fn IO_IRQ_QSPI();
+    fn SIO_IRQ_PROC0();
+    fn SIO_IRQ_PROC1();
+    fn CLOCKS_IRQ();
+    fn SPI0_IRQ();
+    fn SPI1_IRQ();
+    fn UART0_IRQ();
+    fn UART1_IRQ();
+    fn ADC_IRQ_FIFO();
+    fn I2C0_IRQ();
+    fn I2C1_IRQ();
+    fn RTC_IRQ();
+    fn SWI_IRQ_0();
+    fn SWI_IRQ_1();
+    fn SWI_IRQ_2();
+    fn SWI_IRQ_3();
+    fn SWI_IRQ_4();
+    fn SWI_IRQ_5();
 }
 
 #[link_section = ".vector_table.reset_vector"]
@@ -20,9 +69,7 @@ pub static __EXCEPTIONS: [Vector; 14] = [
         handler: NON_MASKABLE_INT,
     },
     // Exception 3: Hard Fault Interrupt.
-    Vector {
-        handler: HARD_FAULT,
-    },
+    Vector { handler: HARDFAULT },
     // Reserved 4-10
     // Exception 4:
     Vector { reserved: 0 },
@@ -118,63 +165,3 @@ pub static __INTERRUPTS: [Vector; 32] = [
     Vector { handler: SWI_IRQ_4 },
     Vector { handler: SWI_IRQ_5 },
 ];
-
-// Default Handler For Unfound Handler Symbols
-#[no_mangle]
-extern "C" fn DefaultHandler() -> ! {
-    loop {}
-}
-
-// Rust Panic Handler
-#[inline(never)]
-#[panic_handler]
-fn panic(_info: &core::panic::PanicInfo) -> ! {
-    loop {
-        core::sync::atomic::compiler_fence(core::sync::atomic::Ordering::SeqCst);
-    }
-}
-
-extern "C" {
-    // RESET HANDLER (RESET_HANDLER.c)
-    fn RESET() -> !;
-    // EXCEPTION HANDLERS (EXCEPTIONS.rs)
-    fn NON_MASKABLE_INT();
-    fn HARD_FAULT();
-    fn SV_CALL();
-    fn PEND_SV();
-    fn SYS_TICK();
-    // INTERRUPT HANDLERS (INTERRUPTS.rs)
-    fn uart_irq();
-    fn TIMER_IRQ_0();
-    fn TIMER_IRQ_1();
-    fn TIMER_IRQ_2();
-    fn TIMER_IRQ_3();
-    fn PWM_IRQ_WRAP();
-    fn USBCTRL_IRQ();
-    fn XIP_IRQ();
-    fn PIO0_IRQ_0();
-    fn PIO0_IRQ_1();
-    fn PIO1_IRQ_0();
-    fn PIO1_IRQ_1();
-    fn DMA_IRQ_0();
-    fn DMA_IRQ_1();
-    fn IO_IRQ_BANK0();
-    fn IO_IRQ_QSPI();
-    fn SIO_IRQ_PROC0();
-    fn SIO_IRQ_PROC1();
-    fn CLOCKS_IRQ();
-    fn SPI0_IRQ();
-    fn SPI1_IRQ();
-    fn UART0_IRQ();
-    fn UART1_IRQ();
-    fn ADC_IRQ_FIFO();
-    fn I2C0_IRQ();
-    fn I2C1_IRQ();
-    fn RTC_IRQ();
-    fn SWI_IRQ_0();
-    fn SWI_IRQ_1();
-    fn SWI_IRQ_2();
-    fn SWI_IRQ_3();
-    fn SWI_IRQ_4();
-    fn SWI_IRQ_5();
-}

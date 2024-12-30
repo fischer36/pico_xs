@@ -19,3 +19,7 @@ src/registers/socs.rs
 examples/ST7735s_SPI.rs
 src/registers/spi.rs
 shit/
+src/usb_xs.rs
+src/registers/clocks.rs
+src/
+examples/interrupt_handler.rs

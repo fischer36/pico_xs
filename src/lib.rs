@@ -25,8 +25,6 @@
 pub mod gpio;
 /// Hardware register modules, providing low-level access to system registers.
 pub mod registers;
-/// USB module.
-pub mod usb_xs;
 /// Interrupt vector handling for the RP2040.
 pub mod vector_table;
 /// Extended support and utility functions.
