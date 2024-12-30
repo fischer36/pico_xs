@@ -58,10 +58,10 @@ extern "C" {
 
 #[link_section = ".vector_table.reset_vector"]
 #[no_mangle]
-pub static __RESET_VECTOR: unsafe extern "C" fn() -> ! = RESET;
+static __RESET_VECTOR: unsafe extern "C" fn() -> ! = RESET;
 
 #[link_section = ".vector_table.exceptions"]
-pub static __EXCEPTIONS: [Vector; 14] = [
+static __EXCEPTIONS: [Vector; 14] = [
     // NMI, PendSV, SVCall SysTick, and HardFault are all system exceptions handled by system handlers.
     //
     // Exception 2: Non Maskable Interrupt.

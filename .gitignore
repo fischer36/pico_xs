@@ -2,6 +2,7 @@
 notes.md
 test.md
 scrap/
+src/
 docs/
 dump
 memory.x
@@ -21,5 +22,5 @@ src/registers/spi.rs
 shit/
 src/usb_xs.rs
 src/registers/clocks.rs
-src/
+src/registers/timer.rs
 examples/interrupt_handler.rs
